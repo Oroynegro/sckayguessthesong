@@ -1,0 +1,24 @@
+# Archivos de configuración local
+.env
+*.env
+
+# Módulos de Node.js
+node_modules/
+
+# Archivos de build
+/dist/
+/build/
+
+# Archivos de log
+*.log
+
+# Archivos de dependencias de dependencias (si usas Yarn)
+.yarn/
+
+# Archivos de IDE (como VSCode, WebStorm)
+.vscode/
+.idea/
+
+# Otros archivos temporales
+.DS_Store
+Thumbs.db
