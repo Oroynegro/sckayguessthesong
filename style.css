@@ -2,10 +2,11 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    font-family: "Audiowide", serif;
 }
 
 body {
-    font-family: Arial, sans-serif;
+
     background: #121212;
     color: white;
     padding: 20px;
@@ -95,6 +96,14 @@ select, input {
     padding: 10px;
     background: rgba(0,0,0,0.2);
     border-radius: 5px;
+}
+#artistNameInput {
+    margin-top: 10px;
+    width: 100%;
+}
+#playlistIdInput {
+    margin-top: 10px;
+    width: 100%;
 }
 
 .current-player {

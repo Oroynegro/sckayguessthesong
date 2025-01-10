@@ -4,7 +4,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SCKAY: Guess the song</title>
     <link rel="stylesheet" href="./style.css">
-    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="container">
@@ -53,18 +55,20 @@
                 <div>
                   <label for="selectionType">Seleccionar por:</label>
                   <select id="selectionType">
-                    <option value="artist">Artista</option>
+                      <option value="artist">Artista</option>
                       <option value="playlist">Playlist</option>
+
                   </select>
               </div>
+            
               <div id="artistSelection" style="display: block;">
-                <label for="artistNameInput">Nombre del Artista:</label>
-                <input type="text" id="artistNameInput" placeholder="Ingresa el nombre del artista">
-            </div>
-              <div id="playlistSelection"style="display: none;">
-                  <label for="playlistIdInput">ID de la Playlist:</label>
-                  <input type="text" id="playlistIdInput" placeholder="Ingresa el ID de la playlist">
+                  <label for="artistNameInput">Nombre del Artista:</label>
+                  <input type="text" id="artistNameInput" placeholder="Ingresa el nombre del artista">
               </div>
+              <div id="playlistSelection" style="display: none;">
+                <label for="playlistIdInput">ID de la Playlist:</label>
+                <input type="text" id="playlistIdInput" placeholder="Ingresa el ID de la playlist">
+            </div>
               
 
                 <button id="startGameBtn" onclick="initializeGame()">¡Comenzar Juego!</button>

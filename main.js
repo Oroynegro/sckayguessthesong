@@ -36,10 +36,13 @@ async function getTracksByArtist(artistName) {
         accessToken = await getAccessToken();
     }
 
-    // Verificar si ya tenemos canciones de este artista en caché
-    if (artistTracksCache[artistName]) {
-        console.log(`Usando canciones en caché para el artista: ${artistName}`);
-        return artistTracksCache[artistName];
+    // Obtener el nivel de dificultad
+    const difficulty = document.getElementById('difficultySelect').value;
+
+    // Verificar si ya tenemos canciones en caché para este artista y dificultad
+    if (artistTracksCache[artistName]?.[difficulty]) {
+        console.log(`Usando canciones en caché para el artista: ${artistName}, dificultad: ${difficulty}`);
+        return artistTracksCache[artistName][difficulty];
     }
 
     try {
@@ -55,32 +58,37 @@ async function getTracksByArtist(artistName) {
             return null;
         }
 
-        // Obtener álbumes relevantes (excluyendo recopilatorios)
-        const albumsResponse = await fetch(`https://api.spotify.com/v1/artists/${artistId}/albums?market=US&include_groups=album,single&limit=50`, {
-            headers: { 'Authorization': `Bearer ${accessToken}` }
-        });
-        const albumsData = await albumsResponse.json();
+        let tracks = [];
 
-        // Obtener todas las canciones de los álbumes
-        const tracks = [];
-        for (let album of albumsData.items) {
-            const albumTracksResponse = await fetch(`https://api.spotify.com/v1/albums/${album.id}/tracks`, {
+        if (difficulty === 'normal') {
+            // Obtener las canciones más populares (top 10)
+            const topTracksResponse = await fetch(`https://api.spotify.com/v1/artists/${artistId}/top-tracks?market=US`, {
                 headers: { 'Authorization': `Bearer ${accessToken}` }
             });
-            const albumTracksData = await albumTracksResponse.json();
+            const topTracksData = await topTracksResponse.json();
+            tracks = topTracksData.tracks.slice(0, 10); // Solo tomar las primeras 10 canciones
+        } else {
+            // Obtener todas las canciones del artista (modo extremo)
+            const albumsResponse = await fetch(`https://api.spotify.com/v1/artists/${artistId}/albums?market=US&include_groups=album,single&limit=50`, {
+                headers: { 'Authorization': `Bearer ${accessToken}` }
+            });
+            const albumsData = await albumsResponse.json();
 
-            // Añadir todas las canciones del álbum
-            tracks.push(...albumTracksData.items);
+            // Recorrer los álbumes para obtener las canciones de cada uno
+            for (let album of albumsData.items) {
+                const albumTracksResponse = await fetch(`https://api.spotify.com/v1/albums/${album.id}/tracks`, {
+                    headers: { 'Authorization': `Bearer ${accessToken}` }
+                });
+                const albumTracksData = await albumTracksResponse.json();
+                tracks.push(...albumTracksData.items);
+            }
         }
 
-        // Guardar las canciones en caché
-        artistTracksCache[artistName] = tracks;
-
-        // Mostrar cuántas canciones y detalles en la consola
-        console.log(`Se obtuvieron ${tracks.length} canciones para el artista ${artistName}:`);
-        tracks.forEach((track, index) => {
-            console.log(`${index + 1}. ${track.name} - ${track.artists.map(artist => artist.name).join(', ')}`);
-        });
+        // Guardar las canciones en caché según el nivel de dificultad
+        if (!artistTracksCache[artistName]) {
+            artistTracksCache[artistName] = {};
+        }
+        artistTracksCache[artistName][difficulty] = tracks;
 
         return tracks;
     } catch (error) {
