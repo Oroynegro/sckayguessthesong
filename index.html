@@ -14,7 +14,7 @@
     <body>
         <div class="container">
             <div class="game-header">
-                <h1>SCKAY</h1>
+                <h1 id="title">SCKAY</h1>
                 <h2>GUESS THE SONG</h2>
             </div>
 
@@ -134,24 +134,23 @@
                 <div class="timer" id="timer">25</div>
 
                 <div class="player-container-container">
+                    
                     <div id="playerContainer" class="player-container"></div>
-                    <div class="overlay">
-                        <div class="guess-container">
-                            <input
-                                type="text"
-                                id="guessInput"
-                                placeholder="Escribe el nombre de la canción..."
-                                disabled
-                            />
-                            <button
-                                id="submitGuess"
-                                onclick="checkGuess()"
-                                disabled
-                            >
-                                Adivinar
-                            </button>
-                        </div>
-                    </div>
+                    <div class="overlay"><div class="guess-container">
+                        <input
+                            type="text"
+                            id="guessInput"
+                            placeholder="Escribe el nombre de la canción..."
+                            disabled
+                        />
+                        <button
+                            id="submitGuess"
+                            onclick="checkGuess()"
+                            disabled
+                        >
+                            Adivinar
+                        </button>
+                    </div></div>
                 </div>
 
                 <div class="answer-container" id="answerContainer">

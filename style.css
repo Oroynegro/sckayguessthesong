@@ -11,9 +11,12 @@ body {
     padding: 20px;
 }
 #submitGuess {
-    background-color: #282828;
+    background-color: #1ed760;
 }
-
+#title{
+    font-size: 2em;
+    
+}
 .container {
     max-width: 800px;
     margin: 0 auto;
@@ -77,6 +80,7 @@ input {
 .game-container {
     background: #282828;
     padding: 20px;
+    padding-bottom: 50px;
     border-radius: 10px;
     text-align: center;
 }
@@ -179,11 +183,15 @@ button:disabled {
 
 input {
     padding: 10px;
-    width: 400px;
+    width: 100%;
     border: none;
     border-radius: 20px;
     margin-right: 10px;
     font-size: 1em;
+}
+#guessInput {
+    width: 400px;
+    margin-bottom: 10px;
 }
 
 input:disabled {
@@ -197,7 +205,6 @@ input:disabled {
 }
 
 .song-info {
-    margin-bottom: 20px;
     padding: 15px;
     background: rgba(0, 0, 0, 0.2);
     border-radius: 5px;
@@ -237,15 +244,22 @@ input:disabled {
         flex-direction: column;
         gap: 10px;
     }
-
+    .song-info {
+        margin-top: 70px;
+    }
     .player-names {
         flex-direction: column;
     }
-    input {
-        width: 200px;
+    .input {
+        width: 100%;
         margin-bottom: 10px;
     }
-
+    #guessInput {
+        font-size: 0.7em;
+        width: 225px;
+        margin: 0;
+        margin-bottom: 40px;
+    }
     .overlay {
         width: 86%;
     }
