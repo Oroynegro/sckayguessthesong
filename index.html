@@ -134,23 +134,24 @@
                 <div class="timer" id="timer">25</div>
 
                 <div class="player-container-container">
-                    <div class="guess-container">
-                        <input
-                            type="text"
-                            id="guessInput"
-                            placeholder="Escribe el nombre de la canción..."
-                            disabled
-                        />
-                        <button
-                            id="submitGuess"
-                            onclick="checkGuess()"
-                            disabled
-                        >
-                            Adivinar
-                        </button>
-                    </div>
                     <div id="playerContainer" class="player-container"></div>
-                    <div class="overlay"></div>
+                    <div class="overlay">
+                        <div class="guess-container">
+                            <input
+                                type="text"
+                                id="guessInput"
+                                placeholder="Escribe el nombre de la canción..."
+                                disabled
+                            />
+                            <button
+                                id="submitGuess"
+                                onclick="checkGuess()"
+                                disabled
+                            >
+                                Adivinar
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="answer-container" id="answerContainer">
