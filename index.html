@@ -1,124 +1,170 @@
 <html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SCKAY: Guess the song</title>
-    <link rel="stylesheet" href="./style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" rel="stylesheet">
-</head>
-<body>
-    <div class="container">
-        <div class="game-header">
-            <h1>SCKAY</h1>
-            <h2>GUESS THE SONG</h2>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>SCKAY: Guess the song</title>
+        <link rel="stylesheet" href="./style.css" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap"
+            rel="stylesheet"
+        />
+    </head>
+    <body>
+        <div class="container">
+            <div class="game-header">
+                <h1>SCKAY</h1>
+                <h2>GUESS THE SONG</h2>
+            </div>
+
+            <!-- Configuración del juego -->
+            <div id="gameConfig" class="game-config">
+                <h2>Configuración del Juego</h2>
+                <div class="config-options">
+                    <div class="mode-select">
+                        <label>Modo de Juego:</label>
+                        <select id="gameMode">
+                            <option value="single">1 Jugador</option>
+                            <option value="multi">2 Jugadores</option>
+                        </select>
+                    </div>
+
+                    <div
+                        id="playerNames"
+                        class="player-names"
+                        style="display: none"
+                    >
+                        <input
+                            type="text"
+                            class="input-players"
+                            id="player1"
+                            placeholder="Jugador 1"
+                        />
+                        <input
+                            type="text"
+                            class="input-players"
+                            id="player2"
+                            placeholder="Jugador 2"
+                        />
+                    </div>
+                    <div class="level-select">
+                        <label>Nivel</label>
+                        <select id="difficultySelect">
+                            <option value="normal">Top 10</option>
+                            <option value="extreme">Todas las canciones</option>
+                        </select>
+                    </div>
+                    <div class="rounds-select">
+                        <label for="roundsNumber">Número de rondas:</label>
+                        <input
+                            type="number"
+                            id="roundsNumber"
+                            value="5"
+                            min="1"
+                        />
+                    </div>
+
+                    <div class="category-select">
+                        <label>Categoría:</label>
+                        <select id="gameCategory">
+                            <option value="song">Adivina la Canción</option>
+                            <option value="artist">Adivina el Artista</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="selectionType">Seleccionar por:</label>
+                        <select id="selectionType">
+                            <option value="artist">Artista</option>
+                            <option value="playlist">Playlist</option>
+                        </select>
+                    </div>
+
+                    <div id="artistSelection" style="display: block">
+                        <label for="artistNameInput">Nombre del Artista:</label>
+                        <input
+                            type="text"
+                            id="artistNameInput"
+                            placeholder="Ingresa el nombre del artista"
+                        />
+                    </div>
+                    <div id="playlistSelection" style="display: none">
+                        <label for="playlistIdInput">ID de la Playlist:</label>
+                        <input
+                            type="text"
+                            id="playlistIdInput"
+                            placeholder="Ingresa el ID de la playlist"
+                        />
+                    </div>
+
+                    <button id="startGameBtn" onclick="initializeGame()">
+                        ¡Comenzar Juego!
+                    </button>
+                </div>
+            </div>
+
+            <!-- Área de juego -->
+            <div id="gameArea" class="game-container" style="display: none">
+                <div class="game-info">
+                    <div class="current-round">
+                        Ronda: <span id="currentRound">1</span>/<span
+                            id="totalRounds"
+                            >5</span
+                        >
+                    </div>
+                    <div class="scores">
+                        <div id="player1Score" class="player-score">
+                            Jugador 1: <span>0</span>
+                        </div>
+                        <div
+                            id="player2Score"
+                            class="player-score"
+                            style="display: none"
+                        >
+                            Jugador 2: <span>0</span>
+                        </div>
+                    </div>
+                    <div id="currentPlayer"></div>
+                </div>
+
+                <div id="gameStatus" class="game-status">
+                    Prepárate para comenzar...
+                </div>
+
+                <div class="timer" id="timer">25</div>
+
+                <div class="player-container-container">
+                    <div class="guess-container">
+                        <input
+                            type="text"
+                            id="guessInput"
+                            placeholder="Escribe el nombre de la canción..."
+                            disabled
+                        />
+                        <button
+                            id="submitGuess"
+                            onclick="checkGuess()"
+                            disabled
+                        >
+                            Adivinar
+                        </button>
+                    </div>
+                    <div id="playerContainer" class="player-container"></div>
+                    <div class="overlay"></div>
+                </div>
+
+                <div class="answer-container" id="answerContainer">
+                    <div class="song-info" id="songInfo"></div>
+                </div>
+            </div>
+
+            <!-- Resultados finales -->
+            <div id="finalResults" class="final-results" style="display: none">
+                <h2>¡Fin del Juego!</h2>
+                <div id="finalScores"></div>
+                <button onclick="resetGame()">Jugar de Nuevo</button>
+            </div>
         </div>
-
-        <!-- Configuración del juego -->
-        <div id="gameConfig" class="game-config">
-            <h2>Configuración del Juego</h2>
-            <div class="config-options">
-                <div class="mode-select">
-                    <label>Modo de Juego:</label>
-                    <select id="gameMode">
-                        <option value="single">1 Jugador</option>
-                        <option value="multi">2 Jugadores</option>
-                    </select>
-                </div>
-                
-
-                <div id="playerNames" class="player-names" style="display: none;">
-                    <input type="text" class="input-players" id="player1" placeholder="Jugador 1">
-                    <input type="text" class="input-players" id="player2" placeholder="Jugador 2">
-                </div>
-                <div class="level-select">
-                  <label >Nivel</label>
-                  <select id="difficultySelect">
-                    <option value="normal">Top 10</option>
-                    <option value="extreme">Todas las canciones</option>
-                </select>
-                </div>
-                <div class="rounds-select">
-                  <label for="roundsNumber">Número de rondas:</label>
-                  <input type="number" id="roundsNumber" value="5" min="1" />
-                  
-                </div>
-
-                <div class="category-select">
-                    <label>Categoría:</label>
-                    <select id="gameCategory">
-                        <option value="song">Adivina la Canción</option>
-                        <option value="artist">Adivina el Artista</option>
-                    </select>
-                </div>
-                <div>
-                  <label for="selectionType">Seleccionar por:</label>
-                  <select id="selectionType">
-                      <option value="artist">Artista</option>
-                      <option value="playlist">Playlist</option>
-
-                  </select>
-              </div>
-            
-              <div id="artistSelection" style="display: block;">
-                  <label for="artistNameInput">Nombre del Artista:</label>
-                  <input type="text" id="artistNameInput" placeholder="Ingresa el nombre del artista">
-              </div>
-              <div id="playlistSelection" style="display: none;">
-                <label for="playlistIdInput">ID de la Playlist:</label>
-                <input type="text" id="playlistIdInput" placeholder="Ingresa el ID de la playlist">
-            </div>
-              
-
-                <button id="startGameBtn" onclick="initializeGame()">¡Comenzar Juego!</button>
-            </div>
-        </div>
-
-        <!-- Área de juego -->
-        <div id="gameArea" class="game-container" style="display: none;">
-            <div class="game-info">
-                <div class="current-round">Ronda: <span id="currentRound">1</span>/<span id="totalRounds">5</span></div>
-                <div class="scores">
-                    <div id="player1Score" class="player-score">Jugador 1: <span>0</span></div>
-                    <div id="player2Score" class="player-score" style="display: none;">Jugador 2: <span>0</span></div>
-                </div>
-                <div id="currentPlayer" class="current-player"></div>
-            </div>
-
-            <div id="gameStatus" class="game-status">
-                Prepárate para comenzar...
-            </div>
-
-            <div class="timer" id="timer">20</div>
-
-            <div class="player-container-container">
-              <div class="guess-container">
-                <input type="text" 
-                       id="guessInput" 
-                       placeholder="Escribe el nombre de la canción..."
-                       disabled>
-                <button id="submitGuess" 
-                        onclick="checkGuess()" 
-                        disabled>Adivinar</button>
-            </div>
-              <div id="playerContainer" class="player-container"></div>
-              <div class="overlay"></div>
-              
-            </div>
-
-            <div class="answer-container" id="answerContainer">
-                <div class="song-info" id="songInfo"></div>
-            </div>
-        </div>
-
-        <!-- Resultados finales -->
-        <div id="finalResults" class="final-results" style="display: none;">
-            <h2>¡Fin del Juego!</h2>
-            <div id="finalScores"></div>
-            <button onclick="resetGame()">Jugar de Nuevo</button>
-        </div>
-    </div>
-    <script src="./main.js"></script>
-</body>
+        <script src="./main.js"></script>
+    </body>
 </html>

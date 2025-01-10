@@ -287,7 +287,7 @@ function endRound(isCorrect) {
         } else {
             nextRound();
         }
-    }, 3000);
+    }, 5000);
 }
 
 function nextRound() {
@@ -312,6 +312,7 @@ function nextRound() {
         updateCurrentPlayer();
         newGame();
     }
+    document.getElementById('guessInput').clear()
 }
 
 
@@ -324,31 +325,58 @@ function updateScores() {
     }
 }
 
-function updateCurrentPlayer() {
-    const currentPlayer = document.getElementById('currentPlayer');
-    currentPlayer.textContent = `Turno de: ${gameConfig.players[gameConfig.currentPlayer].name}`;
+function updateCurrentPlayer() { 
+    const currentPlayerElement = document.getElementById("currentPlayer");
+    
+    // Crear el nuevo h2 con la clase 'current-player'
+    const playerNameElement = document.createElement("h2");
+    playerNameElement.classList.add("current-player");  // Asignar la clase 'current-player'
+    playerNameElement.textContent = gameConfig.players[gameConfig.currentPlayer].name;
+    
+    // Limpiar el contenido anterior (si hay alguno) antes de agregar el nuevo
+    currentPlayerElement.innerHTML = ''; // Limpiar el contenido actual
+    
+    // Insertar el nuevo h2 al contenedor
+    currentPlayerElement.appendChild(playerNameElement);
+    
+    // También se puede mostrar el texto adicional (por ejemplo, "Turno de: ")
+    const turnTextElement = document.createElement("span");
+    turnTextElement.textContent = `Turno de: `;
+    currentPlayerElement.prepend(turnTextElement);
 }
 
-function showFinalResults() {
-    document.getElementById('gameArea').style.display = 'none';
-    const finalResults = document.getElementById('finalResults');
-    finalResults.style.display = 'block';
-    
-    let resultsHTML = `<h3>La puntuación es de:</h3><h2>${gameConfig.players.player1.name}</h2><h2> ${gameConfig.players.player1.score} / ${gameConfig.rounds} <h2>`;
 
-        if (gameConfig.mode === 'multi') {
-            resultsHTML += `${gameConfig.players.player2.name}: <h2> ${gameConfig.players.player2.score} / ${gameConfig.rounds} <h2>`;
-            const winner =
-                gameConfig.players.player1.score > gameConfig.players.player2.score
-                    ? gameConfig.players.player1.name
-                    : gameConfig.players.player1.score < gameConfig.players.player2.score
-                    ? gameConfig.players.player2.name
-                    : 'Empate';
-            resultsHTML += `<h4>El ganador es : ${winner} 🎶</h4>`;
-        }
-    
-        finalResults.innerHTML = resultsHTML;
+function showFinalResults() {
+    document.getElementById("gameArea").style.display = "none";
+    const finalResults = document.getElementById("finalResults");
+    finalResults.style.display = "block";
+
+    let resultsHTML = `<h3>La puntuación es de:</h3><h2 class="final-score-player">${gameConfig.players.player1.name}</h2><h2 class="final-score-number"> ${gameConfig.players.player1.score} / ${gameConfig.rounds} </h2>`;
+
+    if (gameConfig.mode === "multi") {
+        resultsHTML += `<h2 class="final-score-player">${gameConfig.players.player2.name}:</h2><h2 class="final-score-number">${gameConfig.players.player2.score} / ${gameConfig.rounds} </h2>`;
+        const winner =
+            gameConfig.players.player1.score > gameConfig.players.player2.score
+                ? gameConfig.players.player1.name
+                : gameConfig.players.player1.score <
+                  gameConfig.players.player2.score
+                ? gameConfig.players.player2.name
+                : "Empate";
+        resultsHTML += `<h4>El ganador es : </h4><h2 class="final-score-winner">${winner}</h2>`;
     }
+
+    // Agregar botón de "Volver a Jugar"
+    resultsHTML += `
+        <button id="playAgainButton" class="btn btn-primary">Volver a Jugar</button>
+    `;
+
+    finalResults.innerHTML = resultsHTML;
+
+    // Agregar listener al botón de "Volver a Jugar"
+    document.getElementById("playAgainButton").addEventListener("click", () => {
+        resetGame(); // Volver a la configuración inicial del juego
+    });
+}
     
     function updateGameStatus(message, status) {
         const gameStatus = document.getElementById('gameStatus');
