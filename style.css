@@ -107,7 +107,7 @@ input {
 }
 
 .current-player {
-    font-weight: bold;
+    font-size: 1.6em;
     color: #1db954;
 }
 
@@ -130,7 +130,25 @@ input {
 .controls {
     margin: 20px 0;
 }
-
+.player-score {
+    font-size: 1.6em;
+    color: #1ed760;
+    
+}
+.current-player {
+    color: #1ed760;
+}
+.final-score-player, .final-score-number{
+    font-size: 1.6em;
+    color: #1ed760;
+    margin-top: 20px;
+}
+.final-score-winner {
+    font-size: 2em;
+    font-weight: bold;
+    color: #8693f7;
+    margin-bottom: 20px;
+}
 button {
     padding: 10px 20px;
     background: #1db954;
@@ -207,7 +225,7 @@ input:disabled {
     position: absolute; /* Coloca el recuadro encima del iframe */
     top: 0;
     left: 0;
-    width: 93%;
+    width: 93.5%;
     height: 100%;
     background-color: #1ed760; /* Fondo semitransparente */
     border-radius: 12px;
@@ -224,11 +242,11 @@ input:disabled {
         flex-direction: column;
     }
     input {
-        width: 100px;
+        width: 200px;
         margin-bottom: 10px;
     }
 
     .overlay {
-        width: 85%;
+        width: 86%;
     }
 }
