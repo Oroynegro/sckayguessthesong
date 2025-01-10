@@ -53,19 +53,17 @@
                 <div>
                   <label for="selectionType">Seleccionar por:</label>
                   <select id="selectionType">
+                    <option value="artist">Artista</option>
                       <option value="playlist">Playlist</option>
-                      <option value="artist">Artista</option>
                   </select>
               </div>
-              
-              <div id="playlistSelection">
+              <div id="artistSelection" style="display: block;">
+                <label for="artistNameInput">Nombre del Artista:</label>
+                <input type="text" id="artistNameInput" placeholder="Ingresa el nombre del artista">
+            </div>
+              <div id="playlistSelection"style="display: none;">
                   <label for="playlistIdInput">ID de la Playlist:</label>
                   <input type="text" id="playlistIdInput" placeholder="Ingresa el ID de la playlist">
-              </div>
-              
-              <div id="artistSelection" style="display: none;">
-                  <label for="artistNameInput">Nombre del Artista:</label>
-                  <input type="text" id="artistNameInput" placeholder="Ingresa el nombre del artista">
               </div>
               
 
