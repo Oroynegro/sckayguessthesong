@@ -1,34 +1,36 @@
-
-let accessToken = '';
+let accessToken = "";
 let currentTrack = null;
 let timerInterval = null;
 let player = null;
-let playlistId = '2TieOXUFdPe8OrB8WYgKJy?si=5iJTAhqeQYWRAJj2HZf3kA';
-let allTracks = [];  // Variable global para almacenar todas las canciones
+let playlistId = "2TieOXUFdPe8OrB8WYgKJy?si=5iJTAhqeQYWRAJj2HZf3kA";
+let allTracks = []; // Variable global para almacenar todas las canciones
 
 // Variables para el nuevo sistema de juego
 let gameConfig = {
-    mode: 'single',
+    mode: "single",
     rounds: 5,
-    category: 'song',
+    category: "song",
     currentRound: 1,
     usedTracks: new Set(),
     players: {
-        player1: { name: 'Jugador 1', score: 0 },
-        player2: { name: 'Jugador 2', score: 0 }
+        player1: { name: "Jugador 1", score: 0, correctAnswer: 0 },
+        player2: { name: "Jugador 2", score: 0, correctAnswer: 0 },
     },
-    currentPlayer: 'player1'
+    currentPlayer: "player1",
 };
-document.getElementById('selectionType').addEventListener('change', function(e) {
-    if (e.target.value === 'artist') {
-        document.getElementById('playlistSelection').style.display = 'none';
-        document.getElementById('artistSelection').style.display = 'block';
-    } else {
-        document.getElementById('playlistSelection').style.display = 'block';
-        document.getElementById('artistSelection').style.display = 'none';
-    }
-});
-const artistTracksCache = {}; // Objeto para almacenar las canciones por artista
+document
+    .getElementById("selectionType")
+    .addEventListener("change", function (e) {
+        if (e.target.value === "artist") {
+            document.getElementById("playlistSelection").style.display = "none";
+            document.getElementById("artistSelection").style.display = "block";
+        } else {
+            document.getElementById("playlistSelection").style.display =
+                "block";
+            document.getElementById("artistSelection").style.display = "none";
+        }
+    });
+const artistTracksCache = {}; // Caché para almacenar canciones por artista y dificultad
 
 
 async function getTracksByArtist(artistName) {
@@ -37,48 +39,64 @@ async function getTracksByArtist(artistName) {
     }
 
     // Obtener el nivel de dificultad
-    const difficulty = document.getElementById('difficultySelect').value;
+    const difficulty = document.getElementById("difficultySelect").value;
 
     // Verificar si ya tenemos canciones en caché para este artista y dificultad
     if (artistTracksCache[artistName]?.[difficulty]) {
-        console.log(`Usando canciones en caché para el artista: ${artistName}, dificultad: ${difficulty}`);
+        console.log(
+            `Usando canciones en caché para el artista: ${artistName}, dificultad: ${difficulty}`
+        );
         return artistTracksCache[artistName][difficulty];
     }
 
     try {
         // Buscar el artista
-        const searchResponse = await fetch(`https://api.spotify.com/v1/search?q=${encodeURIComponent(artistName)}&type=artist`, {
-            headers: { 'Authorization': `Bearer ${accessToken}` }
-        });
+        const searchResponse = await fetch(
+            `https://api.spotify.com/v1/search?q=${encodeURIComponent(
+                artistName
+            )}&type=artist`,
+            {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            }
+        );
         const searchData = await searchResponse.json();
         const artistId = searchData.artists.items[0]?.id;
 
         if (!artistId) {
-            updateGameStatus('No se encontró el artista', 'error');
+            updateGameStatus("No se encontró el artista", "error");
             return null;
         }
 
         let tracks = [];
 
-        if (difficulty === 'normal') {
+        if (difficulty === "normal") {
             // Obtener las canciones más populares (top 10)
-            const topTracksResponse = await fetch(`https://api.spotify.com/v1/artists/${artistId}/top-tracks?market=US`, {
-                headers: { 'Authorization': `Bearer ${accessToken}` }
-            });
+            const topTracksResponse = await fetch(
+                `https://api.spotify.com/v1/artists/${artistId}/top-tracks?market=US`,
+                {
+                    headers: { Authorization: `Bearer ${accessToken}` },
+                }
+            );
             const topTracksData = await topTracksResponse.json();
             tracks = topTracksData.tracks.slice(0, 10); // Solo tomar las primeras 10 canciones
         } else {
             // Obtener todas las canciones del artista (modo extremo)
-            const albumsResponse = await fetch(`https://api.spotify.com/v1/artists/${artistId}/albums?market=US&include_groups=album,single&limit=50`, {
-                headers: { 'Authorization': `Bearer ${accessToken}` }
-            });
+            const albumsResponse = await fetch(
+                `https://api.spotify.com/v1/artists/${artistId}/albums?market=US&include_groups=album,single&limit=50`,
+                {
+                    headers: { Authorization: `Bearer ${accessToken}` },
+                }
+            );
             const albumsData = await albumsResponse.json();
 
             // Recorrer los álbumes para obtener las canciones de cada uno
             for (let album of albumsData.items) {
-                const albumTracksResponse = await fetch(`https://api.spotify.com/v1/albums/${album.id}/tracks`, {
-                    headers: { 'Authorization': `Bearer ${accessToken}` }
-                });
+                const albumTracksResponse = await fetch(
+                    `https://api.spotify.com/v1/albums/${album.id}/tracks`,
+                    {
+                        headers: { Authorization: `Bearer ${accessToken}` },
+                    }
+                );
                 const albumTracksData = await albumTracksResponse.json();
                 tracks.push(...albumTracksData.items);
             }
@@ -90,10 +108,22 @@ async function getTracksByArtist(artistName) {
         }
         artistTracksCache[artistName][difficulty] = tracks;
 
+        // Mostrar cuántas canciones y detalles en la consola
+        console.log(
+            `Se obtuvieron ${tracks.length} canciones para el artista ${artistName}, dificultad: ${difficulty}`
+        );
+        tracks.forEach((track, index) => {
+            console.log(
+                `${index + 1}. ${track.name} - ${track.artists
+                    .map((artist) => artist.name)
+                    .join(", ")}`
+            );
+        });
+
         return tracks;
     } catch (error) {
-        console.error('Error al obtener las canciones del artista:', error);
-        updateGameStatus('Error al obtener las canciones del artista', 'error');
+        console.error("Error al obtener las canciones del artista:", error);
+        updateGameStatus("Error al obtener las canciones del artista", "error");
         return null;
     }
 }
@@ -104,32 +134,40 @@ function initializeGame() {
     if (guessTheSong.textContent === "Adivina el Artista") {
         document.getElementById("subtitle").textContent = "GUESS THE ARTIST";
     }
+    
+    
 
-    const roundsInput = document.getElementById('roundsNumber').value;
+    const roundsInput = document.getElementById("roundsNumber").value;
     const rounds = parseInt(roundsInput);
 
     if (isNaN(rounds) || rounds <= 0) {
-        updateGameStatus('Por favor, introduce un número válido de rondas.', 'error');
+        updateGameStatus(
+            "Por favor, introduce un número válido de rondas.",
+            "error"
+        );
         return;
     }
 
-    gameConfig.mode = document.getElementById('gameMode').value;
+    gameConfig.mode = document.getElementById("gameMode").value;
     gameConfig.rounds = rounds; // Número de rondas establecido por el usuario
     gameConfig.currentRound = 1;
     gameConfig.usedTracks.clear();
     gameConfig.players.player1.score = 0;
     gameConfig.players.player2.score = 0;
-    gameConfig.currentPlayer = 'player1';
-    gameConfig.totalRounds = gameConfig.mode === 'multi' ? rounds * 2 : rounds; // Ajuste para multijugador
-    gameConfig.category = document.getElementById('gameCategory').value;
+    gameConfig.currentPlayer = "player1";
+    gameConfig.totalRounds = gameConfig.mode === "multi" ? rounds * 2 : rounds; // Ajuste para multijugador
+    gameConfig.category = document.getElementById("gameCategory").value;
+    
 
     // Configurar nombres de jugadores
-    if (gameConfig.mode === 'multi') {
-        gameConfig.players.player1.name = document.getElementById('player1').value || 'Jugador 1';
-        gameConfig.players.player2.name = document.getElementById('player2').value || 'Jugador 2';
-        document.getElementById('player2Score').style.display = 'block';
+    if (gameConfig.mode === "multi") {
+        gameConfig.players.player1.name =
+            document.getElementById("player1").value || "Jugador 1";
+        gameConfig.players.player2.name =
+            document.getElementById("player2").value || "Jugador 2";
+        document.getElementById("player2Score").style.display = "block";
     } else {
-        document.getElementById('player2Score').style.display = 'none';
+        document.getElementById("player2Score").style.display = "none";
     }
 
     // Resetear puntuaciones y ronda actual
@@ -138,13 +176,14 @@ function initializeGame() {
     gameConfig.usedTracks.clear();
     gameConfig.players.player1.score = 0;
     gameConfig.players.player2.score = 0;
-    gameConfig.currentPlayer = 'player1';
+    gameConfig.currentPlayer = "player1";
 
     // Actualizar UI
-    document.getElementById('gameConfig').style.display = 'none';
-    document.getElementById('gameArea').style.display = 'block';
-    document.getElementById('currentRound').textContent = gameConfig.currentRound;
-    document.getElementById('totalRounds').textContent = gameConfig.rounds;
+    document.getElementById("gameConfig").style.display = "none";
+    document.getElementById("gameArea").style.display = "block";
+    document.getElementById("currentRound").textContent =
+        gameConfig.currentRound;
+    document.getElementById("totalRounds").textContent = gameConfig.rounds;
     updateScores();
     updateCurrentPlayer();
 
@@ -152,13 +191,10 @@ function initializeGame() {
     newGame();
 }
 
-
-
-
 // Event listener para el modo de juego
-document.getElementById('gameMode').addEventListener('change', function(e) {
-    document.getElementById('playerNames').style.display = 
-        e.target.value === 'multi' ? 'block' : 'none';
+document.getElementById("gameMode").addEventListener("change", function (e) {
+    document.getElementById("playerNames").style.display =
+        e.target.value === "multi" ? "block" : "none";
 });
 
 async function getAccessToken() {
@@ -172,45 +208,47 @@ async function getAccessToken() {
     }
 }
 
-
-
 // Usarla directamente en getRandomTrack:
 async function getRandomTrack() {
     if (!accessToken) {
         accessToken = await getAccessToken(); // Asignar el token aquí
     }
-   
 
     try {
-        const playlistResponse = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}`, {
-            headers: {
-                'Authorization': `Bearer ${accessToken}`
+        const playlistResponse = await fetch(
+            `https://api.spotify.com/v1/playlists/${playlistId}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                },
             }
-        });
+        );
         const playlist = await playlistResponse.json();
-        
+
         // Filtrar canciones ya usadas
-        const availableTracks = playlist.tracks.items.filter(item => 
-            !gameConfig.usedTracks.has(item.track.id)
+        const availableTracks = playlist.tracks.items.filter(
+            (item) => !gameConfig.usedTracks.has(item.track.id)
         );
 
         if (availableTracks.length === 0) {
-            updateGameStatus('¡No hay más canciones disponibles!', 'error');
+            updateGameStatus("¡No hay más canciones disponibles!", "error");
             return null;
         }
 
-        const randomTrack = availableTracks[Math.floor(Math.random() * availableTracks.length)].track;
+        const randomTrack =
+            availableTracks[Math.floor(Math.random() * availableTracks.length)]
+                .track;
         gameConfig.usedTracks.add(randomTrack.id);
-        
+
         return randomTrack;
     } catch (error) {
-        updateGameStatus('Error al obtener la canción', 'error');
+        updateGameStatus("Error al obtener la canción", "error");
         return null;
     }
 }
 
 function updatePlayer(trackId) {
-    const playerContainer = document.getElementById('playerContainer');
+    const playerContainer = document.getElementById("playerContainer");
     playerContainer.innerHTML = `
         <iframe
             src="https://open.spotify.com/embed/track/${trackId}?utm_source=generator"
@@ -230,50 +268,73 @@ function normalizeString(str) {
 }
 
 function checkGuess() {
-    const guess = normalizeString(document.getElementById('guessInput').value.trim());
-    let correctAnswer = '';
+    const guess = normalizeString(
+        document.getElementById("guessInput").value.trim()
+    );
+    let correctAnswer = "";
     let isCorrect = false;
 
     // Validar que el usuario ingresó una respuesta
     if (!guess) {
-        updateGameStatus('Escribe una respuesta antes de enviar.', 'error');
+        updateGameStatus("Escribe una respuesta antes de enviar.", "error");
         return;
     }
 
-    if (gameConfig.category === 'song') {
+    if (gameConfig.category === "song") {
         correctAnswer = normalizeString(currentTrack.name);
-        isCorrect = guess.length > 0 && (guess === correctAnswer || 
-            correctAnswer.includes(guess) || 
-            guess.includes(correctAnswer));
- 
+        isCorrect =
+            guess.length > 0 &&
+            (guess === correctAnswer ||
+                correctAnswer.includes(guess) ||
+                guess.includes(correctAnswer));
     } else {
         correctAnswer = normalizeString(currentTrack.artists[0].name);
-        isCorrect = guess.length > 0 && (guess === correctAnswer || 
-            correctAnswer.includes(guess) || 
-            guess.includes(correctAnswer));
- 
+        isCorrect =
+            guess.length > 0 &&
+            (guess === correctAnswer ||
+                correctAnswer.includes(guess) ||
+                guess.includes(correctAnswer));
     }
-    
+
     clearInterval(timerInterval);
     endRound(isCorrect);
-    guessInput.value = '';
+    guessInput.value = "";
 }
+
+let timeLeft = 25;  // Tiempo inicial del temporizador
 
 
 
 function endRound(isCorrect) {
-    const guessInputShow = document.getElementById('guessInput').value.trim();
-    document.getElementById('guessInput').disabled = true;
-    document.getElementById('submitGuess').disabled = true;
-    
+    const guessInputShow = document.getElementById("guessInput").value.trim();
+    document.getElementById("guessInput").disabled = true;
+    document.getElementById("submitGuess").disabled = true;
+
+    // Calcular los puntos por tiempo restante
+    let pointsForTime = 0;
+    if (timeLeft > 20) {
+        pointsForTime = 100;  // Si quedan más de 20 segundos, da 100 puntos extra
+    } else if (timeLeft > 10) {
+        pointsForTime = 75;   // Si quedan entre 10 y 20 segundos, da 75 puntos extra
+    } else if (timeLeft > 5) {
+        pointsForTime = 50;   // Si quedan entre 5 y 10 segundos, da 50 puntos extra
+    } else if (timeLeft > 0) {
+        pointsForTime = 25;   // Si quedan menos de 5 segundos, da 25 puntos extra
+    }
+
     if (isCorrect) {
-        gameConfig.players[gameConfig.currentPlayer].score += 1;
-        updateGameStatus('¡Correcto! 🎉', 'correct');
+        gameConfig.players[gameConfig.currentPlayer].score += 100 + pointsForTime; // 100 puntos por respuesta correcta + puntos por tiempo
+        gameConfig.players[gameConfig.currentPlayer].correctAnswers += 1; // Incrementa los aciertos
+        updateGameStatus("¡Correcto! 🎉", "correct");
     } else {
-        const correctAnswer = gameConfig.category === 'song' ? 
-            currentTrack.name : currentTrack.artists[0].name;
-        updateGameStatus(`¡Incorrecto! no era: <h2 class="answer-submited">${guessInputShow}</h2> era: <h2 class="answer-submited">${correctAnswer}</h2>`,
-        "incorrect");
+        const correctAnswer =
+            gameConfig.category === "song"
+                ? currentTrack.name
+                : currentTrack.artists[0].name;
+        updateGameStatus(
+            `¡Incorrecto! no era: <h2 class="answer-submited">${guessInputShow}</h2> era: <h2 class="answer-submited">${correctAnswer}</h2>`,
+            "incorrect"
+        );
     }
 
     updateScores();
@@ -281,10 +342,10 @@ function endRound(isCorrect) {
 
     // Preparar siguiente ronda o finalizar juego
     setTimeout(() => {
-        if (gameConfig.mode === 'multi') {
-            if (gameConfig.currentPlayer === 'player1' && !isCorrect) {
+        if (gameConfig.mode === "multi") {
+            if (gameConfig.currentPlayer === "player1" && !isCorrect) {
                 // Si el jugador 1 falló, le toca al jugador 2
-                gameConfig.currentPlayer = 'player2';
+                gameConfig.currentPlayer = "player2";
                 updateCurrentPlayer();
                 newGame();
             } else {
@@ -297,12 +358,13 @@ function endRound(isCorrect) {
 }
 
 function nextRound() {
-    if (gameConfig.mode === 'multi') {
+    if (gameConfig.mode === "multi") {
         // Cambiar jugador
-        gameConfig.currentPlayer = (gameConfig.currentPlayer === 'player1') ? 'player2' : 'player1';
-        
+        gameConfig.currentPlayer =
+            gameConfig.currentPlayer === "player1" ? "player2" : "player1";
+
         // Solo incrementar la ronda cuando vuelve al primer jugador
-        if (gameConfig.currentPlayer === 'player1') {
+        if (gameConfig.currentPlayer === "player1") {
             gameConfig.currentRound++;
         }
     } else {
@@ -314,22 +376,37 @@ function nextRound() {
     if (gameConfig.currentRound > gameConfig.rounds) {
         showFinalResults();
     } else {
-        document.getElementById('currentRound').textContent = gameConfig.currentRound;
+        document.getElementById("currentRound").textContent =
+            gameConfig.currentRound;
         updateCurrentPlayer();
         newGame();
     }
-    document.getElementById('guessInput').clear()
-}
+    document.getElementById("guessInput").value = "";  // Limpia el campo de entrada
 
+}
 
 function updateScores() {
-    document.getElementById('player1Score').innerHTML = 
-        `${gameConfig.players.player1.name}: <span>${gameConfig.players.player1.score}</span>`;
-    if (gameConfig.mode === 'multi') {
-        document.getElementById('player2Score').innerHTML = 
-            `${gameConfig.players.player2.name}: <span>${gameConfig.players.player2.score}</span>`;
+    document.getElementById("player1Score").innerHTML = `
+        <div class="player-info">
+            <span class="player-name">${gameConfig.players.player1.name}</span><span class="separator-1">:</span> <span class="score">${gameConfig.players.player1.score}</span><span class="emoji fire">⭐</span>
+        </div>
+        <div class="player-stats">
+            <span class="correct-answer">${gameConfig.players.player1.correctAnswer}</span><span class="separator-2">/</span><span class="total-rounds">${gameConfig.rounds}</span>
+        </div>
+    `;
+    
+    if (gameConfig.mode === "multi") {
+        document.getElementById("player2Score").innerHTML = `
+        <div class="player-info">
+            <span class="player-name">${gameConfig.players.player2.name}</span><span class="separator-1">: </span><span class="score">${gameConfig.players.player2.score}</span><span class="emoji fire">⭐</span>
+        </div>
+        <div class="player-stats">
+            <span class="correct-answer">${gameConfig.players.player2.correctAnswer}</span><span class="separator-2">/</span><span class="total-rounds">${gameConfig.rounds}</span>
+        </div>
+    `;
     }
 }
+
 
 function updateCurrentPlayer() { 
     const currentPlayerElement = document.getElementById("currentPlayer");
@@ -357,10 +434,9 @@ function showFinalResults() {
     const finalResults = document.getElementById("finalResults");
     finalResults.style.display = "block";
 
-    let resultsHTML = `<h3>La puntuación es de:</h3><h2 class="final-score-player">${gameConfig.players.player1.name}</h2><h2 class="final-score-number"> ${gameConfig.players.player1.score} / ${gameConfig.rounds} </h2>`;
+    let resultsHTML = "";
 
     if (gameConfig.mode === "multi") {
-        resultsHTML += `<h2 class="final-score-player">${gameConfig.players.player2.name}:</h2><h2 class="final-score-number">${gameConfig.players.player2.score} / ${gameConfig.rounds} </h2>`;
         const winner =
             gameConfig.players.player1.score > gameConfig.players.player2.score
                 ? gameConfig.players.player1.name
@@ -368,10 +444,46 @@ function showFinalResults() {
                   gameConfig.players.player2.score
                 ? gameConfig.players.player2.name
                 : "Empate";
-        resultsHTML += `<h4>El ganador es : </h4><h2 class="final-score-winner">${winner}</h2>`;
+
+        // Mensaje del ganador en la parte superior
+        resultsHTML += `
+            <h4 id="theWinnerIs">El ganador es:</h4>
+            <h2 class="final-score-winner">${winner} 🏆</h2>
+        `;
     }
 
-    // Agregar botón de "Volver a Jugar"
+    // Detalles de los jugadores
+    resultsHTML += `
+        <div class="player-info-final">
+            <span class="player-name-final">${gameConfig.players.player1.name}</span>
+            <span class="separator-1-final">:</span>
+            <span class="score-final">${gameConfig.players.player1.score}</span>
+            <span class="emoji-final">⭐</span>
+        </div>
+        <div class="player-stats-final">
+            <span class="correct-answer-final">${gameConfig.players.player1.correctAnswer}</span>
+            <span class="separator-2-final">/</span>
+            <span class="total-rounds-final">${gameConfig.rounds}</span>
+        </div>
+    `;
+
+    if (gameConfig.mode === "multi") {
+        resultsHTML += `
+            <div class="player-info-final">
+                <span class="player-name-final">${gameConfig.players.player2.name}</span>
+                <span class="separator-1-final">:</span>
+                <span class="score-final">${gameConfig.players.player2.score}</span>
+                <span class="emoji-final">⭐</span>
+            </div>
+            <div class="player-stats-final">
+                <span class="correct-answer-final">${gameConfig.players.player2.correctAnswer}</span>
+                <span class="separator-2-final">/</span>
+                <span class="total-rounds-final">${gameConfig.rounds}</span>
+            </div>
+        `;
+    }
+
+    // Botón de "Volver a Jugar"
     resultsHTML += `
         <button id="playAgainButton" class="btn btn-primary">Volver a Jugar</button>
     `;
@@ -383,41 +495,22 @@ function showFinalResults() {
         resetGame(); // Volver a la configuración inicial del juego
     });
 }
-    
+
 function updateGameStatus(message, status) {
     const gameStatus = document.getElementById("gameStatus");
     gameStatus.innerHTML = message; // Cambiamos textContent a innerHTML
     gameStatus.className = `game-status ${status}`;
 }
-    
-    function displaySongInfo() {
-        const songInfo = document.getElementById('songInfo');
-        songInfo.innerHTML = `
+
+
+function displaySongInfo() {
+    const songInfo = document.getElementById("songInfo");
+    songInfo.innerHTML = `
             <p><strong>Canción:</strong> ${currentTrack.name}</p>
             <p><strong>Artista:</strong> ${currentTrack.artists[0].name}</p>
         `;
-        document.getElementById('answerContainer').style.display = 'block';
-    }
-    
-// Función para extraer el ID de la playlist
-function extractPlaylistId(input) {
-    // Si el input está vacío, retornar el ID por defecto
-    if (!input) return "2TieOXUFdPe8OrB8WYgKJy";
-
-    // Si es una URL de Spotify
-    if (input.includes('spotify.com/playlist/')) {
-        // Extraer el ID después de /playlist/
-        const match = input.match(/playlist\/([a-zA-Z0-9]+)/);
-        if (match) {
-            // Remover cualquier parámetro adicional después del ID
-            return match[1].split('?')[0];
-        }
-    }
-    
-    // Si no es una URL, asumimos que es un ID directo
-    return input.split('?')[0]; // Remover cualquier parámetro adicional
+    document.getElementById("answerContainer").style.display = "block";
 }
-
 
 // Función para buscar artistas
 async function searchArtists(query) {
@@ -687,36 +780,44 @@ function initializePlaylistSearch() {
 document.addEventListener("DOMContentLoaded", initializePlaylistSearch);
 
 async function newGame() {
-    resetGameUI();  // Llamada a una función que resetee la UI del juego
-    updateGameStatus('Cargando nueva canción...');
+    resetGameUI();
+    updateGameStatus("Cargando nueva canción...");
 
-    const selectionType = document.getElementById('selectionType').value;
+    const selectionType = document.getElementById("selectionType").value;
 
     if (selectionType === "playlist") {
         const playlistInput = document.getElementById("playlistIdInput").value.trim();
         playlistId = extractPlaylistId(playlistInput) || playlistId;
         currentTrack = await getRandomTrack();
     } else {
-        const artistName = document.getElementById('artistNameInput').value.trim();
-        
+        const artistName = document
+            .getElementById("artistNameInput")
+            .value.trim();
+
         // Llamar a resetArtistTracks para limpiar canciones de un artista previo
         resetArtistTracks();
-        
+
         const artistTracks = await getTracksByArtist(artistName);
-        
+
         if (!artistTracks || artistTracks.length === 0) {
-            updateGameStatus('No se encontraron canciones para el artista', 'error');
+            updateGameStatus(
+                "No se encontraron canciones para el artista",
+                "error"
+            );
             return;
         }
 
         // Filtrar canciones ya usadas
-        const availableTracks = artistTracks.filter(track => !gameConfig.usedTracks.has(track.id));
+        const availableTracks = artistTracks.filter(
+            (track) => !gameConfig.usedTracks.has(track.id)
+        );
         if (availableTracks.length === 0) {
-            updateGameStatus('¡No hay más canciones disponibles!', 'error');
+            updateGameStatus("¡No hay más canciones disponibles!", "error");
             return;
         }
 
-        currentTrack = availableTracks[Math.floor(Math.random() * availableTracks.length)];
+        currentTrack =
+            availableTracks[Math.floor(Math.random() * availableTracks.length)];
         gameConfig.usedTracks.add(currentTrack.id);
     }
 
@@ -725,42 +826,40 @@ async function newGame() {
     }
 
     updatePlayer(currentTrack.id);
-    document.getElementById('guessInput').disabled = false;
-    document.getElementById('submitGuess').disabled = false;
+    document.getElementById("guessInput").disabled = false;
+    document.getElementById("submitGuess").disabled = false;
     startTimer();
-    updateGameStatus('¡Escucha y adivina!');
+    updateGameStatus("¡Escucha y adivina!");
 }
-
 
 function resetArtistTracks() {
-    allTracks = [];  // Limpiar las canciones almacenadas
+    allTracks = []; // Limpiar las canciones almacenadas
 }
 
-        
-    function startTimer() {
-        const timer = document.getElementById('timer');
-        let timeLeft = 25;
+function startTimer() {
+    const timer = document.getElementById("timer");
+    timeLeft = 25; // Reinicia el tiempo cada vez que empieza una nueva ronda
+    timer.textContent = timeLeft;
+
+    timerInterval = setInterval(() => {
+        timeLeft--;
         timer.textContent = timeLeft;
-    
-        timerInterval = setInterval(() => {
-            timeLeft--;
-            timer.textContent = timeLeft;
-    
-            if (timeLeft <= 0) {
-                clearInterval(timerInterval);
-                endRound(false);
-            }
-        }, 1000);
-    }
-    
-    function resetGameUI() {
-        document.getElementById('answerContainer').style.display = 'none';
-        document.getElementById('songInfo').innerHTML = '';
-    }
-    
-    function resetGame() {
-        document.getElementById('gameConfig').style.display = 'block';
-        document.getElementById('gameArea').style.display = 'none';
-        document.getElementById('finalResults').style.display = 'none';
-    }
-    
+
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            endRound(false);  // Finaliza la ronda si se acaba el tiempo
+        }
+    }, 1000);
+}
+
+function resetGameUI() {
+    document.getElementById("answerContainer").style.display = "none";
+    document.getElementById("songInfo").innerHTML = "";
+}
+
+function resetGame() {
+    document.getElementById("gameConfig").style.display = "block";
+    document.getElementById("gameArea").style.display = "none";
+    document.getElementById("finalResults").style.display = "none";
+}
+

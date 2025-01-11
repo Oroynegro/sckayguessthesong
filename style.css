@@ -4,6 +4,14 @@
     box-sizing: border-box;
     font-family: "Audiowide", serif;
 }
+/* Contenedor general para los puntajes */
+
+
+.player-name {
+    font-weight: bold;
+    margin-right: 5px;
+}
+
 
 body {
     background: #121212;
@@ -16,6 +24,10 @@ body {
 #title{
     font-size: 2em;
     
+}
+.separator{
+    color: #fff;
+    font-weight: 1000;
 }
 .container {
     max-width: 800px;
@@ -35,9 +47,62 @@ body {
 }
 
 .score {
-    font-size: 1.2em;
-    color: #fff;
+    font-size: 1.8em;
+    color: #1ed760;
 }
+.player-name {
+    font-size: 1.8em;
+    color: #1ed760;
+}
+.emoji{
+    font-size: 1.8em;
+}
+.score-final {
+    font-size: 2.6em;
+    color: #1ed760;
+}
+.player-name-final {
+    font-size: 2.6em;
+    color: #1ed760;
+}
+.emoji-final{
+    font-size: 2.6em;
+}
+.separator-1 {
+    font-size: 1.8em;
+    color: white;
+}
+.separator-2 {
+    font-size: 1.2em;
+    color: white;
+}
+.separator-1-final {
+    font-size: 2.6em;
+    font-weight: 900;
+    color: white;
+}
+.separator-2-final {
+    font-size: 1.8em;
+    font-weight: 900;
+    color: white;
+}
+
+.correct-answer, .total-rounds{
+    font-size: 1.8em;
+    color: #1ed760;
+}
+.correct-answer-final, .total-rounds-final{
+    font-size: 1.8em;
+    color: #1ed760;
+
+}
+.player-stats-final{
+    margin-bottom: 20px;
+}
+#theWinnerIs{
+    font-size: 2em;
+}
+
 .game-config {
     background: #282828;
     padding: 20px;
@@ -147,12 +212,7 @@ input {
     color: #1ed760;
     margin-top: 20px;
 }
-.final-score-winner {
-    font-size: 2em;
-    font-weight: bold;
-    color: #8693f7;
-    margin-bottom: 20px;
-}
+
 button {
     padding: 10px 20px;
     background: #1db954;
@@ -227,10 +287,6 @@ input:disabled {
     text-align: center;
 }
 
-.final-results h2 {
-    color: #1db954;
-    margin-bottom: 20px;
-}
 .overlay {
     position: absolute; /* Coloca el recuadro encima del iframe */
     top: 0;
@@ -367,7 +423,12 @@ input:disabled {
     overflow: hidden;
     text-overflow: ellipsis;
 }
-
+.final-score-winner {
+    font-size: 3.2em;
+    font-weight: bold;
+    color: #ffff92;
+    margin: 40px 0;
+}
 
 @media (max-width: 600px) {
     .game-info {

@@ -68,8 +68,8 @@
                     <div class="category-select">
                         <label>Categoría:</label>
                         <select id="gameCategory">
-                            <option value="song">Adivina la Canción</option>
-                            <option value="artist">Adivina el Artista</option>
+                            <option value="song" id="guessTheSong">Adivina la Canción</option>
+                            <option value="artist" id="guessTheArtist">Adivina el Artista</option>
                         </select>
                     </div>
                     <div>
@@ -89,11 +89,11 @@
                         />
                     </div>
                     <div id="playlistSelection" style="display: none">
-                        <label for="playlistIdInput">ID de la Playlist:</label>
+                        <label for="playlistIdInput">URL o ID de la Playlist:</label>
                         <input
                             type="text"
                             id="playlistIdInput"
-                            placeholder="Ingresa el ID de la playlist"
+                            placeholder="Ingresa la URL o ID de la playlist"
                         />
                     </div>
 
@@ -112,18 +112,34 @@
                             >5</span
                         >
                     </div>
-                    <div class="scores">
-                        <div id="player1Score" class="player-score">
-                            Jugador 1: <span>0</span>
+                    <div id="player1Score" class="score-container">
+                        <div class="player-info">
+                            <span class="player-name">${gameConfig.players.player1.name}</span>
+                            <span class="separator-1">:</span>
+                            <span class="score">${gameConfig.players.player1.score}</span>
+                            <span class="emoji fire">🔥</span>
                         </div>
-                        <div
-                            id="player2Score"
-                            class="player-score"
-                            style="display: none"
-                        >
-                            Jugador 2: <span>0</span>
+                        <div class="player-stats">
+                            <span class="correct-answer">${gameConfig.players.player1.correctAnswers}</span>
+                            <span class="separator-2">/</span>
+                            <span class="total-rounds">${gameConfig.rounds}</span>
                         </div>
                     </div>
+                    
+                    <div id="player2Score" class="score-container">
+                        <div class="player-info">
+                            <span class="player-name">${gameConfig.players.player2.name}</span>
+                            <span class="separator-1">:</span>
+                            <span class="score">${gameConfig.players.player2.score}</span>
+                            <span class="emoji fire">🔥</span>
+                        </div>
+                        <div class="player-stats">
+                            <span class="correct-answer">${gameConfig.players.player2.correctAnswers}</span>
+                            <span class="separator-2">/</span>
+                            <span class="total-rounds">${gameConfig.rounds}</span>
+                        </div>
+                    </div>
+                    
                     <div id="currentPlayer"></div>
                 </div>
 
@@ -168,3 +184,4 @@
         <script src="./main.js"></script>
     </body>
 </html>
+
