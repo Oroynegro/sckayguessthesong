@@ -100,6 +100,11 @@ async function getTracksByArtist(artistName) {
 
 // Función para inicializar el juego
 function initializeGame() {
+    const guessTheSong = document.getElementById("guessTheArtist");
+    if (guessTheSong.textContent === "Adivina el Artista") {
+        document.getElementById("subtitle").textContent = "GUESS THE ARTIST";
+    }
+
     const roundsInput = document.getElementById('roundsNumber').value;
     const rounds = parseInt(roundsInput);
 
