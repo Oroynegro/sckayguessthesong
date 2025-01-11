@@ -30,6 +30,56 @@ document
             document.getElementById("artistSelection").style.display = "none";
         }
     });
+
+// Listener para el cambio en el modo de juego
+document
+    .querySelector("#gameMode")
+    .addEventListener("change", actualizarMaximo);
+
+// Listener para el cambio en la dificultad
+document
+    .querySelector("#difficultySelect")
+    .addEventListener("change", actualizarMaximo);
+
+// Listener para validar el valor del input roundsNumber
+document.getElementById("roundsNumber").addEventListener("input", function () {
+    const max = parseInt(this.max, 10); // Obtener el valor máximo permitido
+    const currentValue = parseInt(this.value, 10);
+
+    if (currentValue > max) {
+        this.value = max; // Ajustar el valor al máximo permitido si lo excede
+        console.log("Valor ajustado al máximo permitido:", max);
+    }
+});
+
+// Función para actualizar el valor máximo basado en modo y dificultad
+function actualizarMaximo() {
+    console.log(
+        "Valor difficultySelect:",
+        document.getElementById("difficultySelect").value
+    );
+    console.log("Valor gameMode:", document.getElementById("gameMode").value);
+
+    const roundsInput = document.getElementById("roundsNumber");
+
+    if (
+        document.getElementById("gameMode").value === "single" &&
+        document.getElementById("difficultySelect").value === "normal"
+    ) {
+        roundsInput.max = 10;
+        console.log("Max value set to 10");
+    } else if (
+        document.getElementById("gameMode").value === "multi" &&
+        document.getElementById("difficultySelect").value === "normal"
+    ) {
+        roundsInput.max = 5;
+        console.log("Max value set to 5");
+    } else {
+        roundsInput.max = 1000;
+        console.log("Max value set to 1000");
+    }
+}
+
 const artistTracksCache = {}; // Caché para almacenar canciones por artista y dificultad
 
 async function getTracksByArtist(artistName) {
@@ -149,7 +199,7 @@ function initializeGame() {
         document.getElementById("player2Score").style.display = "block";
     } else {
         gameConfig.players.player1.name =
-        document.getElementById("player1").value || "Jugador 1";
+            document.getElementById("player1").value || "Jugador 1";
         document.getElementById("player2Score").style.display = "none";
     }
 
@@ -233,24 +283,25 @@ async function getRandomTrack() {
 function updatePlayer(trackId) {
     return new Promise((resolve) => {
         const playerContainer = document.getElementById("playerContainer");
-        
+
         // Crear el iframe
-        const iframe = document.createElement('iframe');
+        const iframe = document.createElement("iframe");
         iframe.src = `https://open.spotify.com/embed/track/${trackId}?utm_source=generator`;
         iframe.width = "100%";
         iframe.height = "100px";
         iframe.frameBorder = "0";
-        iframe.allow = "clipboard-write; encrypted-media; fullscreen; picture-in-picture";
+        iframe.allow =
+            "clipboard-write; encrypted-media; fullscreen; picture-in-picture";
         iframe.loading = "lazy";
-        
+
         // Agregar el evento de carga
         iframe.onload = () => {
-            console.log('Spotify player loaded');
+            console.log("Spotify player loaded");
             resolve();
         };
-        
+
         // Limpiar y agregar el nuevo iframe
-        playerContainer.innerHTML = '';
+        playerContainer.innerHTML = "";
         playerContainer.appendChild(iframe);
     });
 }
@@ -838,7 +889,9 @@ async function newGame() {
             }
 
             currentTrack =
-                availableTracks[Math.floor(Math.random() * availableTracks.length)];
+                availableTracks[
+                    Math.floor(Math.random() * availableTracks.length)
+                ];
             gameConfig.usedTracks.add(currentTrack.id);
         }
 
@@ -848,12 +901,12 @@ async function newGame() {
 
         // Esperar a que el reproductor se cargue completamente
         await updatePlayer(currentTrack.id);
-        
+
         // Una vez cargado el reproductor, habilitar controles e iniciar el timer
         document.getElementById("guessInput").disabled = false;
         document.getElementById("submitGuess").disabled = false;
         document.getElementById("guessInput").focus();
-        
+
         startTimer();
         updateGameStatus("¡Escucha y adivina!");
     } catch (error) {

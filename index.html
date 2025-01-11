@@ -35,20 +35,22 @@
                         class="player-names"
                         style="display: block"
                     >
-                    <input
-                    type="text"
-                    class="input-players"
-                    id="player1"
-                    placeholder="Jugador 1"
-                    style="display: block;"
-                />
-                <input
-                    type="text"
-                    class="input-players"
-                    id="player2"
-                    placeholder="Jugador 2"
-                    style="display: none;"
-                />
+                        <input
+                            type="text"
+                            class="input-players"
+                            id="player1"
+                            placeholder="Jugador 1"
+                            style="display: block"
+                            maxlength="8"
+                        />
+                        <input
+                            type="text"
+                            class="input-players"
+                            id="player2"
+                            placeholder="Jugador 2"
+                            style="display: none"
+                            maxlength="8"
+                        />
                     </div>
                     <div class="level-select">
                         <label>Nivel</label>
@@ -64,6 +66,7 @@
                             id="roundsNumber"
                             value="5"
                             min="1"
+                            max="10"
                         />
                     </div>
 

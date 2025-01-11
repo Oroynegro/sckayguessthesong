@@ -4,33 +4,6 @@
     box-sizing: border-box;
     font-family: "Audiowide", serif;
 }
-/* Contenedor general para los puntajes */
-
-/* Contenedor de instrucciones */
-.play-instruction {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-top: -15px;
-    margin-left: 94%;
-}
-
-.arrow {
-    width: 60px; /* Ancho de la línea de la flecha */
-    height: 40px; /* Altura total de la flecha */
-    margin-bottom: 5px;
-}
-
-/* Texto debajo de la flecha */
-.play-instruction span {
-    font-size: 14px;
-    color: white;
-}
-
-.player-name {
-    font-weight: bold;
-    margin-right: 5px;
-}
 
 body {
     background: #121212;
@@ -61,6 +34,31 @@ body {
     margin-bottom: 10px;
 }
 
+/* Contenedor de instrucciones */
+.play-instruction {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: -15px;
+    margin-left: 94%;
+}
+
+.arrow {
+    width: 60px; /* Ancho de la línea de la flecha */
+    height: 40px; /* Altura total de la flecha */
+    margin-bottom: 5px;
+}
+
+/* Texto debajo de la flecha */
+.play-instruction span {
+    font-size: 14px;
+    color: white;
+}
+
+.player-name {
+    font-weight: bold;
+    margin-right: 5px;
+}
 .score {
     font-size: 1.8em;
     color: #1ed760;
