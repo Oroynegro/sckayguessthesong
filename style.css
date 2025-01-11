@@ -21,19 +21,16 @@
     margin-bottom: 5px;
 }
 
-
 /* Texto debajo de la flecha */
 .play-instruction span {
     font-size: 14px;
     color: white;
 }
 
-
 .player-name {
     font-weight: bold;
     margin-right: 5px;
 }
-
 
 body {
     background: #121212;
@@ -43,9 +40,8 @@ body {
 #submitGuess {
     background-color: #282828;
 }
-#title{
+#title {
     font-size: 2em;
-    
 }
 
 .container {
@@ -73,7 +69,7 @@ body {
     font-size: 1.8em;
     color: #1ed760;
 }
-.emoji{
+.emoji {
     font-size: 1.8em;
 }
 .score-final {
@@ -84,7 +80,7 @@ body {
     font-size: 2.6em;
     color: #1ed760;
 }
-.emoji-final{
+.emoji-final {
     font-size: 2.6em;
 }
 .separator-1 {
@@ -106,19 +102,20 @@ body {
     color: white;
 }
 
-.correct-answer, .total-rounds{
+.correct-answer,
+.total-rounds {
     font-size: 1.8em;
     color: #1ed760;
 }
-.correct-answer-final, .total-rounds-final{
+.correct-answer-final,
+.total-rounds-final {
     font-size: 1.8em;
     color: #1ed760;
-
 }
-.player-stats-final{
+.player-stats-final {
     margin-bottom: 20px;
 }
-#theWinnerIs{
+#theWinnerIs {
     font-size: 2em;
 }
 
@@ -221,12 +218,12 @@ input {
 .player-score {
     font-size: 1.6em;
     color: #1ed760;
-    
 }
 .current-player {
     color: #1ed760;
 }
-.final-score-player, .final-score-number{
+.final-score-player,
+.final-score-number {
     font-size: 1.6em;
     color: #1ed760;
     margin-top: 20px;
@@ -268,7 +265,7 @@ input {
     margin-right: 10px;
     font-size: 1em;
 }
-.answer-submited{
+.answer-submited {
     color: #1ed760;
 }
 #guessInput {
@@ -320,7 +317,10 @@ input:disabled {
 /* Contenedor de resultados de búsqueda de artistas */
 .artist-results-container {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Diseño de cuadrícula adaptable */
+    grid-template-columns: repeat(
+        auto-fill,
+        minmax(150px, 1fr)
+    ); /* Diseño de cuadrícula adaptable */
     gap: 16px;
     padding: 20px;
     background-color: #282828; /* Fondo oscuro */
@@ -377,17 +377,19 @@ input:disabled {
     text-overflow: ellipsis;
 }
 
-
 /* Contenedor de resultados de búsqueda de playlist */
 .playlist-results-container {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); /* Ajuste de tamaño mínimo */
+    grid-template-columns: repeat(
+        auto-fill,
+        minmax(180px, 1fr)
+    ); /* Ajuste de tamaño mínimo */
     gap: 16px;
     padding: 20px;
     background-color: #282828; /* Fondo oscuro */
 }
 
-#playlistSearchInput{
+#playlistSearchInput {
     margin-top: 10px;
 }
 /* Cada tarjeta de playlist */
@@ -485,7 +487,7 @@ input:disabled {
         font-size: 1.2em;
         color: #1ed760;
     }
-    .emoji{
+    .emoji {
         font-size: 1.2em;
     }
 
@@ -498,7 +500,8 @@ input:disabled {
         color: white;
     }
 
-    .correct-answer, .total-rounds{
+    .correct-answer,
+    .total-rounds {
         font-size: 0.8em;
         color: #1ed760;
     }
@@ -517,7 +520,7 @@ input:disabled {
         font-size: 1.8em;
         color: #1ed760;
     }
-    .emoji-final{
+    .emoji-final {
         font-size: 1.8em;
     }
     .separator-1-final {
@@ -530,20 +533,19 @@ input:disabled {
         font-weight: 900;
         color: white;
     }
-    .correct-answer-final, .total-rounds-final{
+    .correct-answer-final,
+    .total-rounds-final {
         font-size: 1.2em;
         color: #1ed760;
-    
     }
-    .player-stats-final{
+    .player-stats-final {
         margin-bottom: 20px;
     }
     .play-instruction {
         margin-left: 90%;
         margin-top: -20px;
     }
-    .answer-submited{
+    .answer-submited {
         font-size: 1em;
     }
-
 }

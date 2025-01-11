@@ -32,7 +32,6 @@ document
     });
 const artistTracksCache = {}; // Caché para almacenar canciones por artista y dificultad
 
-
 async function getTracksByArtist(artistName) {
     if (!accessToken) {
         accessToken = await getAccessToken();
@@ -43,7 +42,6 @@ async function getTracksByArtist(artistName) {
 
     // Verificar si ya tenemos canciones en caché para este artista y dificultad
     if (artistTracksCache[artistName]?.[difficulty]) {
-        
         return artistTracksCache[artistName][difficulty];
     }
 
@@ -106,7 +104,6 @@ async function getTracksByArtist(artistName) {
         }
         artistTracksCache[artistName][difficulty] = tracks;
 
-
         return tracks;
     } catch (error) {
         console.error("Error al obtener las canciones del artista:", error);
@@ -121,8 +118,6 @@ function initializeGame() {
     if (guessTheSong.textContent === "Adivina el Artista") {
         document.getElementById("subtitle").textContent = "GUESS THE ARTIST";
     }
-    
-    
 
     const roundsInput = document.getElementById("roundsNumber").value;
     const rounds = parseInt(roundsInput);
@@ -144,7 +139,6 @@ function initializeGame() {
     gameConfig.currentPlayer = "player1";
     gameConfig.totalRounds = gameConfig.mode === "multi" ? rounds * 2 : rounds; // Ajuste para multijugador
     gameConfig.category = document.getElementById("gameCategory").value;
-    
 
     // Configurar nombres de jugadores
     if (gameConfig.mode === "multi") {
@@ -186,11 +180,11 @@ document.getElementById("gameMode").addEventListener("change", function (e) {
 
 async function getAccessToken() {
     try {
-        const response = await fetch('/api/getAccessToken');
+        const response = await fetch("/api/getAccessToken");
         const data = await response.json();
         return data.access_token;
     } catch (error) {
-        console.error('Error al obtener el token:', error);
+        console.error("Error al obtener el token:", error);
         return null;
     }
 }
@@ -254,15 +248,22 @@ function normalizeString(str) {
         .replace(/[\u0300-\u036f]/g, ""); // Elimina marcas diacríticas (tildes)
 }
 
-function checkGuess() {
+function checkGuess(isTimeOut = false) {
     const guess = normalizeString(
         document.getElementById("guessInput").value.trim()
     );
     let correctAnswer = "";
     let isCorrect = false;
 
-    // Validar que el usuario ingresó una respuesta
-    if (!guess) {
+    // Si es timeout y no hay respuesta, terminamos la ronda directamente
+    if (isTimeOut && !guess) {
+        clearInterval(timerInterval);
+        endRound(false);
+        return;
+    }
+
+    // Validar que el usuario ingresó una respuesta (solo si no es timeout)
+    if (!isTimeOut && !guess) {
         updateGameStatus("Escribe una respuesta antes de enviar.", "error");
         return;
     }
@@ -281,16 +282,12 @@ function checkGuess() {
         (guess.length >= minLength && correctAnswer.includes(guess)) || // Guess incluido en la respuesta
         (correctAnswer.length >= minLength && guess.includes(correctAnswer)); // Respuesta incluida en guess
 
-
     clearInterval(timerInterval);
     endRound(isCorrect);
     guessInput.value = "";
 }
 
-
-let timeLeft = 25;  // Tiempo inicial del temporizador
-
-
+let timeLeft = 25; // Tiempo inicial del temporizador
 
 function endRound(isCorrect) {
     const guessInputShow = document.getElementById("guessInput").value.trim();
@@ -300,17 +297,18 @@ function endRound(isCorrect) {
     // Calcular los puntos por tiempo restante
     let pointsForTime = 0;
     if (timeLeft > 20) {
-        pointsForTime = 200;  // Si quedan más de 20 segundos, da 100 puntos extra
+        pointsForTime = 200; // Si quedan más de 20 segundos, da 100 puntos extra
     } else if (timeLeft > 10) {
-        pointsForTime = 150;   // Si quedan entre 10 y 20 segundos, da 75 puntos extra
+        pointsForTime = 150; // Si quedan entre 10 y 20 segundos, da 75 puntos extra
     } else if (timeLeft > 5) {
-        pointsForTime = 100;   // Si quedan entre 5 y 10 segundos, da 50 puntos extra
+        pointsForTime = 100; // Si quedan entre 5 y 10 segundos, da 50 puntos extra
     } else if (timeLeft > 0) {
-        pointsForTime = 50;   // Si quedan menos de 5 segundos, da 25 puntos extra
+        pointsForTime = 50; // Si quedan menos de 5 segundos, da 25 puntos extra
     }
 
     if (isCorrect) {
-        gameConfig.players[gameConfig.currentPlayer].score += 300 + pointsForTime; // 100 puntos por respuesta correcta + puntos por tiempo
+        gameConfig.players[gameConfig.currentPlayer].score +=
+            300 + pointsForTime; // 100 puntos por respuesta correcta + puntos por tiempo
         gameConfig.players[gameConfig.currentPlayer].correctAnswers += 1; // Incrementa los aciertos
         updateGameStatus("¡Correcto! 🎉", "correct");
     } else {
@@ -318,8 +316,8 @@ function endRound(isCorrect) {
             gameConfig.category === "song"
                 ? currentTrack.name
                 : currentTrack.artists[0].name;
-                        // Restar 50 puntos por respuesta incorrecta
-        if (gameConfig.players[gameConfig.currentPlayer].score > 0){
+        // Restar 50 puntos por respuesta incorrecta
+        if (gameConfig.players[gameConfig.currentPlayer].score > 0) {
             gameConfig.players[gameConfig.currentPlayer].score -= 50;
         }
         updateGameStatus(
@@ -372,8 +370,7 @@ function nextRound() {
         updateCurrentPlayer();
         newGame();
     }
-    document.getElementById("guessInput").value = "";  // Limpia el campo de entrada
-
+    document.getElementById("guessInput").value = ""; // Limpia el campo de entrada
 }
 
 function updateScores() {
@@ -385,7 +382,7 @@ function updateScores() {
             <span class="correct-answer">${gameConfig.players.player1.correctAnswers}</span><span class="separator-2">/</span><span class="total-rounds">${gameConfig.rounds}</span>
         </div>
     `;
-    
+
     if (gameConfig.mode === "multi") {
         document.getElementById("player2Score").innerHTML = `
         <div class="player-info">
@@ -398,27 +395,26 @@ function updateScores() {
     }
 }
 
-
-function updateCurrentPlayer() { 
+function updateCurrentPlayer() {
     const currentPlayerElement = document.getElementById("currentPlayer");
-    
+
     // Crear el nuevo h2 con la clase 'current-player'
     const playerNameElement = document.createElement("h2");
-    playerNameElement.classList.add("current-player");  // Asignar la clase 'current-player'
-    playerNameElement.textContent = gameConfig.players[gameConfig.currentPlayer].name;
-    
+    playerNameElement.classList.add("current-player"); // Asignar la clase 'current-player'
+    playerNameElement.textContent =
+        gameConfig.players[gameConfig.currentPlayer].name;
+
     // Limpiar el contenido anterior (si hay alguno) antes de agregar el nuevo
-    currentPlayerElement.innerHTML = ''; // Limpiar el contenido actual
-    
+    currentPlayerElement.innerHTML = ""; // Limpiar el contenido actual
+
     // Insertar el nuevo h2 al contenedor
     currentPlayerElement.appendChild(playerNameElement);
-    
+
     // También se puede mostrar el texto adicional (por ejemplo, "Turno de: ")
     const turnTextElement = document.createElement("span");
     turnTextElement.textContent = `Turno de: `;
     currentPlayerElement.prepend(turnTextElement);
 }
-
 
 function showFinalResults() {
     document.getElementById("gameArea").style.display = "none";
@@ -492,7 +488,6 @@ function updateGameStatus(message, status) {
     gameStatus.className = `game-status ${status}`;
 }
 
-
 function displaySongInfo() {
     document.getElementById("playInstruction").style.display = "none";
     const songInfo = document.getElementById("songInfo");
@@ -511,7 +506,9 @@ async function searchArtists(query) {
 
     try {
         const response = await fetch(
-            `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=artist&limit=5`,
+            `https://api.spotify.com/v1/search?q=${encodeURIComponent(
+                query
+            )}&type=artist&limit=5`,
             {
                 headers: { Authorization: `Bearer ${accessToken}` },
             }
@@ -534,31 +531,35 @@ async function searchArtists(query) {
 function displayArtistResults(artists) {
     const resultsContainer = document.getElementById("artistSearchResults");
     resultsContainer.innerHTML = "";
-    
+
     if (!artists || artists.length === 0) {
-        resultsContainer.innerHTML = "<div class='artist-result'>No se encontraron artistas</div>";
+        resultsContainer.innerHTML =
+            "<div class='artist-result'>No se encontraron artistas</div>";
         return;
     }
-    
-    artists.forEach(artist => {
+
+    artists.forEach((artist) => {
         if (!artist) return;
-        
+
         const artistElement = document.createElement("div");
         artistElement.className = "artist-result";
-        
+
         // Obtener la imagen del artista o usar un placeholder
-        const imageUrl = artist.images && artist.images.length > 0 
-            ? artist.images[0].url 
-            : 'https://placehold.co/60x60?text=No+Image';
-        
+        const imageUrl =
+            artist.images && artist.images.length > 0
+                ? artist.images[0].url
+                : "https://placehold.co/60x60?text=No+Image";
+
         // Obtener el número de seguidores formateado
-        const followers = artist.followers?.total 
+        const followers = artist.followers?.total
             ? new Intl.NumberFormat().format(artist.followers.total)
-            : '0';
-        
+            : "0";
+
         artistElement.innerHTML = `
             <div class="artist-item">
-                <img src="${imageUrl}" alt="${artist.name}" class="artist-thumbnail">
+                <img src="${imageUrl}" alt="${
+            artist.name
+        }" class="artist-thumbnail">
                 <div class="artist-info">
                     <h4>${artist.name}</h4>
                     <p>${followers} seguidores</p>
@@ -566,14 +567,14 @@ function displayArtistResults(artists) {
                 </div>
             </div>
         `;
-        
+
         if (artist.name) {
             artistElement.addEventListener("click", () => {
                 document.getElementById("artistNameInput").value = artist.name;
                 resultsContainer.innerHTML = ""; // Limpiar resultados
             });
         }
-        
+
         resultsContainer.appendChild(artistElement);
     });
 }
@@ -585,24 +586,27 @@ function initializeArtistSearch() {
         console.error("No se encontró el elemento artistNameInput");
         return;
     }
-    
-    artistInput.insertAdjacentHTML('afterend', `
+
+    artistInput.insertAdjacentHTML(
+        "afterend",
+        `
         <div id="artistSearchContainer">
             <div id="artistSearchResults" class="artist-results-container"></div>
         </div>
-    `);
-    
+    `
+    );
+
     // Configurar el evento de búsqueda con debounce
     let timeout;
     artistInput.addEventListener("input", (e) => {
         clearTimeout(timeout);
         const query = e.target.value.trim();
-        
+
         if (query.length < 3) {
             document.getElementById("artistSearchResults").innerHTML = "";
             return;
         }
-        
+
         timeout = setTimeout(async () => {
             const artists = await searchArtists(query);
             displayArtistResults(artists);
@@ -621,46 +625,48 @@ function extractPlaylistId(input) {
     if (!input) return "2TieOXUFdPe8OrB8WYgKJy";
 
     // Si es una URL de Spotify
-    if (input.includes('spotify.com/playlist/')) {
+    if (input.includes("spotify.com/playlist/")) {
         // Extraer el ID después de /playlist/
         const match = input.match(/playlist\/([a-zA-Z0-9]+)/);
         if (match) {
             // Remover cualquier parámetro adicional después del ID
-            return match[1].split('?')[0];
+            return match[1].split("?")[0];
         }
     }
-    
+
     // Si no es una URL, asumimos que es un ID directo
-    return input.split('?')[0]; // Remover cualquier parámetro adicional
+    return input.split("?")[0]; // Remover cualquier parámetro adicional
 }
 
 // Función para mostrar los resultados de la búsqueda con manejo de datos faltantes
 function displayPlaylistResults(playlists) {
     const resultsContainer = document.getElementById("playlistSearchResults");
     resultsContainer.innerHTML = "";
-    
+
     if (!playlists || playlists.length === 0) {
-        resultsContainer.innerHTML = "<div class='playlist-result'>No se encontraron playlists</div>";
+        resultsContainer.innerHTML =
+            "<div class='playlist-result'>No se encontraron playlists</div>";
         return;
     }
-    
-    playlists.forEach(playlist => {
+
+    playlists.forEach((playlist) => {
         // Verificar que playlist es un objeto válido
         if (!playlist) return;
-        
+
         const playlistElement = document.createElement("div");
         playlistElement.className = "playlist-result";
-        
+
         // Manejar caso donde no hay imágenes o datos faltantes
-        const imageUrl = playlist.images && playlist.images.length > 0 
-            ? playlist.images[0].url 
-            : 'https://placehold.co/60x60?text=No+Image';
-            
+        const imageUrl =
+            playlist.images && playlist.images.length > 0
+                ? playlist.images[0].url
+                : "https://placehold.co/60x60?text=No+Image";
+
         // Manejar otros datos potencialmente faltantes
-        const playlistName = playlist.name || 'Sin nombre';
-        const ownerName = playlist.owner?.display_name || 'Usuario desconocido';
+        const playlistName = playlist.name || "Sin nombre";
+        const ownerName = playlist.owner?.display_name || "Usuario desconocido";
         const trackCount = playlist.tracks?.total || 0;
-        
+
         playlistElement.innerHTML = `
             <div class="playlist-item">
                 <img src="${imageUrl}" alt="${playlistName}" class="playlist-thumbnail">
@@ -671,7 +677,7 @@ function displayPlaylistResults(playlists) {
                 </div>
             </div>
         `;
-        
+
         // Solo añadir el evento click si tenemos un ID válido
         if (playlist.id) {
             playlistElement.addEventListener("click", () => {
@@ -680,7 +686,7 @@ function displayPlaylistResults(playlists) {
                 // También podríamos ocultar el contenedor de búsqueda aquí
             });
         }
-        
+
         resultsContainer.appendChild(playlistElement);
     });
 }
@@ -699,24 +705,26 @@ async function searchPlaylists(query) {
 
     try {
         const response = await fetch(
-            `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=playlist&limit=5`,
+            `https://api.spotify.com/v1/search?q=${encodeURIComponent(
+                query
+            )}&type=playlist&limit=5`,
             {
                 headers: { Authorization: `Bearer ${accessToken}` },
             }
         );
-        
+
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         const data = await response.json();
-        
+
         // Verificar que tenemos los datos que esperamos
         if (!data.playlists || !data.playlists.items) {
             console.error("Formato de respuesta inesperado:", data);
             return [];
         }
-        
+
         return data.playlists.items;
     } catch (error) {
         console.error("Error al buscar playlists:", error);
@@ -725,7 +733,6 @@ async function searchPlaylists(query) {
     }
 }
 
-
 function initializePlaylistSearch() {
     // Insertar el HTML de búsqueda después del input de playlist existente
     const playlistInput = document.getElementById("playlistIdInput");
@@ -733,8 +740,10 @@ function initializePlaylistSearch() {
         console.error("No se encontró el elemento playlistIdInput");
         return;
     }
-    
-    playlistInput.insertAdjacentHTML('afterend', `
+
+    playlistInput.insertAdjacentHTML(
+        "afterend",
+        `
         <div id="playlistSearchContainer">
             <input 
                 type="text" 
@@ -744,8 +753,9 @@ function initializePlaylistSearch() {
             >
             <div id="playlistSearchResults" class="playlist-results-container"></div>
         </div>
-    `);
-    
+    `
+    );
+
     // Configurar el evento de búsqueda con debounce
     let timeout;
     const searchInput = document.getElementById("playlistSearchInput");
@@ -753,12 +763,12 @@ function initializePlaylistSearch() {
         searchInput.addEventListener("input", (e) => {
             clearTimeout(timeout);
             const query = e.target.value.trim();
-            
+
             if (query.length < 3) {
                 document.getElementById("playlistSearchResults").innerHTML = "";
                 return;
             }
-            
+
             timeout = setTimeout(async () => {
                 const playlists = await searchPlaylists(query);
                 displayPlaylistResults(playlists);
@@ -777,7 +787,9 @@ async function newGame() {
     const selectionType = document.getElementById("selectionType").value;
 
     if (selectionType === "playlist") {
-        const playlistInput = document.getElementById("playlistIdInput").value.trim();
+        const playlistInput = document
+            .getElementById("playlistIdInput")
+            .value.trim();
         playlistId = extractPlaylistId(playlistInput) || playlistId;
         currentTrack = await getRandomTrack();
     } else {
@@ -838,14 +850,15 @@ function startTimer() {
 
         if (timeLeft <= 0) {
             clearInterval(timerInterval);
-            endRound(false);  // Finaliza la ronda si se acaba el tiempo
+            // En lugar de llamar directamente a endRound, llamamos a checkGuess
+            checkGuess(true); // Pasamos true para indicar que es una verificación por tiempo
         }
     }, 1000);
 }
 
 function resetGameUI() {
     document.getElementById("answerContainer").style.display = "none";
-    document.getElementById("playInstruction").style.display = "flex"
+    document.getElementById("playInstruction").style.display = "flex";
     document.getElementById("songInfo").innerHTML = "";
 }
 
@@ -854,4 +867,3 @@ function resetGame() {
     document.getElementById("gameArea").style.display = "none";
     document.getElementById("finalResults").style.display = "none";
 }
-
