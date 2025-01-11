@@ -43,9 +43,7 @@ async function getTracksByArtist(artistName) {
 
     // Verificar si ya tenemos canciones en caché para este artista y dificultad
     if (artistTracksCache[artistName]?.[difficulty]) {
-        console.log(
-            `Usando canciones en caché para el artista: ${artistName}, dificultad: ${difficulty}`
-        );
+        
         return artistTracksCache[artistName][difficulty];
     }
 
@@ -108,17 +106,6 @@ async function getTracksByArtist(artistName) {
         }
         artistTracksCache[artistName][difficulty] = tracks;
 
-        // Mostrar cuántas canciones y detalles en la consola
-        console.log(
-            `Se obtuvieron ${tracks.length} canciones para el artista ${artistName}, dificultad: ${difficulty}`
-        );
-        tracks.forEach((track, index) => {
-            console.log(
-                `${index + 1}. ${track.name} - ${track.artists
-                    .map((artist) => artist.name)
-                    .join(", ")}`
-            );
-        });
 
         return tracks;
     } catch (error) {
