@@ -25,10 +25,7 @@ body {
     font-size: 2em;
     
 }
-.separator{
-    color: #fff;
-    font-weight: 1000;
-}
+
 .container {
     max-width: 800px;
     margin: 0 auto;
@@ -456,5 +453,67 @@ input:disabled {
     }
     #submitGuess {
         background-color: #1ed760;
+    }
+
+    .score {
+        font-size: 1.2em;
+        color: #1ed760;
+    }
+    .player-name {
+        font-size: 1.2em;
+        color: #1ed760;
+    }
+    .emoji{
+        font-size: 1.2em;
+    }
+
+    .separator-1 {
+        font-size: 1.2em;
+        color: white;
+    }
+    .separator-2 {
+        font-size: 0.8em;
+        color: white;
+    }
+
+    .correct-answer, .total-rounds{
+        font-size: 0.8em;
+        color: #1ed760;
+    }
+
+    .final-score-winner {
+        font-size: 3.2em;
+        font-weight: bold;
+        color: #ffff92;
+        margin: 40px 0;
+    }
+    .score-final {
+        font-size: 1.8em;
+        color: #1ed760;
+    }
+    .player-name-final {
+        font-size: 1.8em;
+        color: #1ed760;
+    }
+    .emoji-final{
+        font-size: 1.8em;
+    }
+    .separator-1-final {
+        font-size: 1.8em;
+        font-weight: 900;
+        color: white;
+    }
+    .separator-2-final {
+        font-size: 1.2em;
+        font-weight: 900;
+        color: white;
+    }
+    .correct-answer-final, .total-rounds-final{
+        font-size: 1.2em;
+        color: #1ed760;
+    
+    }
+    .player-stats-final{
+        margin-bottom: 20px;
     }
 }

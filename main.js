@@ -13,8 +13,8 @@ let gameConfig = {
     currentRound: 1,
     usedTracks: new Set(),
     players: {
-        player1: { name: "Jugador 1", score: 0, correctAnswer: 0 },
-        player2: { name: "Jugador 2", score: 0, correctAnswer: 0 },
+        player1: { name: "Jugador 1", score: 0, correctAnswers: 0 },
+        player2: { name: "Jugador 2", score: 0, correctAnswers: 0 },
     },
     currentPlayer: "player1",
 };
@@ -378,7 +378,7 @@ function updateScores() {
             <span class="player-name">${gameConfig.players.player1.name}</span><span class="separator-1">:</span> <span class="score">${gameConfig.players.player1.score}</span><span class="emoji fire">⭐</span>
         </div>
         <div class="player-stats">
-            <span class="correct-answer">${gameConfig.players.player1.correctAnswer}</span><span class="separator-2">/</span><span class="total-rounds">${gameConfig.rounds}</span>
+            <span class="correct-answer">${gameConfig.players.player1.correctAnswers}</span><span class="separator-2">/</span><span class="total-rounds">${gameConfig.rounds}</span>
         </div>
     `;
     
@@ -388,7 +388,7 @@ function updateScores() {
             <span class="player-name">${gameConfig.players.player2.name}</span><span class="separator-1">: </span><span class="score">${gameConfig.players.player2.score}</span><span class="emoji fire">⭐</span>
         </div>
         <div class="player-stats">
-            <span class="correct-answer">${gameConfig.players.player2.correctAnswer}</span><span class="separator-2">/</span><span class="total-rounds">${gameConfig.rounds}</span>
+            <span class="correct-answer">${gameConfig.players.player2.correctAnswers}</span><span class="separator-2">/</span><span class="total-rounds">${gameConfig.rounds}</span>
         </div>
     `;
     }
@@ -434,7 +434,6 @@ function showFinalResults() {
 
         // Mensaje del ganador en la parte superior
         resultsHTML += `
-            <h4 id="theWinnerIs">El ganador es:</h4>
             <h2 class="final-score-winner">${winner} 🏆</h2>
         `;
     }
@@ -448,7 +447,7 @@ function showFinalResults() {
             <span class="emoji-final">⭐</span>
         </div>
         <div class="player-stats-final">
-            <span class="correct-answer-final">${gameConfig.players.player1.correctAnswer}</span>
+            <span class="correct-answer-final">${gameConfig.players.player1.correctAnswers}</span>
             <span class="separator-2-final">/</span>
             <span class="total-rounds-final">${gameConfig.rounds}</span>
         </div>
@@ -463,7 +462,7 @@ function showFinalResults() {
                 <span class="emoji-final">⭐</span>
             </div>
             <div class="player-stats-final">
-                <span class="correct-answer-final">${gameConfig.players.player2.correctAnswer}</span>
+                <span class="correct-answer-final">${gameConfig.players.player2.correctAnswers}</span>
                 <span class="separator-2-final">/</span>
                 <span class="total-rounds-final">${gameConfig.rounds}</span>
             </div>
