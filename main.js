@@ -412,6 +412,274 @@ function extractPlaylistId(input) {
     return input.split('?')[0]; // Remover cualquier parámetro adicional
 }
 
+
+// Función para buscar artistas
+async function searchArtists(query) {
+    if (!accessToken) {
+        accessToken = await getAccessToken();
+    }
+
+    try {
+        const response = await fetch(
+            `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=artist&limit=5`,
+            {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data.artists.items;
+    } catch (error) {
+        console.error("Error al buscar artistas:", error);
+        updateGameStatus("Error al buscar artistas", "error");
+        return [];
+    }
+}
+
+// Función para mostrar los resultados de la búsqueda de artistas
+function displayArtistResults(artists) {
+    const resultsContainer = document.getElementById("artistSearchResults");
+    resultsContainer.innerHTML = "";
+    
+    if (!artists || artists.length === 0) {
+        resultsContainer.innerHTML = "<div class='artist-result'>No se encontraron artistas</div>";
+        return;
+    }
+    
+    artists.forEach(artist => {
+        if (!artist) return;
+        
+        const artistElement = document.createElement("div");
+        artistElement.className = "artist-result";
+        
+        // Obtener la imagen del artista o usar un placeholder
+        const imageUrl = artist.images && artist.images.length > 0 
+            ? artist.images[0].url 
+            : 'https://placehold.co/60x60?text=No+Image';
+        
+        // Obtener el número de seguidores formateado
+        const followers = artist.followers?.total 
+            ? new Intl.NumberFormat().format(artist.followers.total)
+            : '0';
+        
+        artistElement.innerHTML = `
+            <div class="artist-item">
+                <img src="${imageUrl}" alt="${artist.name}" class="artist-thumbnail">
+                <div class="artist-info">
+                    <h4>${artist.name}</h4>
+                    <p>${followers} seguidores</p>
+                    <p>Popularidad: ${artist.popularity || 0}%</p>
+                </div>
+            </div>
+        `;
+        
+        if (artist.name) {
+            artistElement.addEventListener("click", () => {
+                document.getElementById("artistNameInput").value = artist.name;
+                resultsContainer.innerHTML = ""; // Limpiar resultados
+            });
+        }
+        
+        resultsContainer.appendChild(artistElement);
+    });
+}
+
+// Función para inicializar la búsqueda de artistas
+function initializeArtistSearch() {
+    const artistInput = document.getElementById("artistNameInput");
+    if (!artistInput) {
+        console.error("No se encontró el elemento artistNameInput");
+        return;
+    }
+    
+    artistInput.insertAdjacentHTML('afterend', `
+        <div id="artistSearchContainer">
+            <div id="artistSearchResults" class="artist-results-container"></div>
+        </div>
+    `);
+    
+    // Configurar el evento de búsqueda con debounce
+    let timeout;
+    artistInput.addEventListener("input", (e) => {
+        clearTimeout(timeout);
+        const query = e.target.value.trim();
+        
+        if (query.length < 3) {
+            document.getElementById("artistSearchResults").innerHTML = "";
+            return;
+        }
+        
+        timeout = setTimeout(async () => {
+            const artists = await searchArtists(query);
+            displayArtistResults(artists);
+        }, 500);
+    });
+}
+
+// Llamar a la inicialización cuando se cargue la página
+document.addEventListener("DOMContentLoaded", () => {
+    initializeArtistSearch();
+});
+
+// Función para extraer el ID de la playlist
+function extractPlaylistId(input) {
+    // Si el input está vacío, retornar el ID por defecto
+    if (!input) return "2TieOXUFdPe8OrB8WYgKJy";
+
+    // Si es una URL de Spotify
+    if (input.includes('spotify.com/playlist/')) {
+        // Extraer el ID después de /playlist/
+        const match = input.match(/playlist\/([a-zA-Z0-9]+)/);
+        if (match) {
+            // Remover cualquier parámetro adicional después del ID
+            return match[1].split('?')[0];
+        }
+    }
+    
+    // Si no es una URL, asumimos que es un ID directo
+    return input.split('?')[0]; // Remover cualquier parámetro adicional
+}
+
+// Función para mostrar los resultados de la búsqueda con manejo de datos faltantes
+function displayPlaylistResults(playlists) {
+    const resultsContainer = document.getElementById("playlistSearchResults");
+    resultsContainer.innerHTML = "";
+    
+    if (!playlists || playlists.length === 0) {
+        resultsContainer.innerHTML = "<div class='playlist-result'>No se encontraron playlists</div>";
+        return;
+    }
+    
+    playlists.forEach(playlist => {
+        // Verificar que playlist es un objeto válido
+        if (!playlist) return;
+        
+        const playlistElement = document.createElement("div");
+        playlistElement.className = "playlist-result";
+        
+        // Manejar caso donde no hay imágenes o datos faltantes
+        const imageUrl = playlist.images && playlist.images.length > 0 
+            ? playlist.images[0].url 
+            : 'https://placehold.co/60x60?text=No+Image';
+            
+        // Manejar otros datos potencialmente faltantes
+        const playlistName = playlist.name || 'Sin nombre';
+        const ownerName = playlist.owner?.display_name || 'Usuario desconocido';
+        const trackCount = playlist.tracks?.total || 0;
+        
+        playlistElement.innerHTML = `
+            <div class="playlist-item">
+                <img src="${imageUrl}" alt="${playlistName}" class="playlist-thumbnail">
+                <div class="playlist-info">
+                    <h4>${playlistName}</h4>
+                    <p>Por: ${ownerName}</p>
+                    <p>${trackCount} canciones</p>
+                </div>
+            </div>
+        `;
+        
+        // Solo añadir el evento click si tenemos un ID válido
+        if (playlist.id) {
+            playlistElement.addEventListener("click", () => {
+                document.getElementById("playlistIdInput").value = playlist.id;
+                resultsContainer.innerHTML = ""; // Limpiar resultados después de seleccionar
+                // También podríamos ocultar el contenedor de búsqueda aquí
+            });
+        }
+        
+        resultsContainer.appendChild(playlistElement);
+    });
+}
+
+// Función para buscar playlists con mejor manejo de errores
+async function searchPlaylists(query) {
+    if (!accessToken) {
+        try {
+            accessToken = await getAccessToken();
+        } catch (error) {
+            console.error("Error al obtener el token:", error);
+            updateGameStatus("Error al conectar con Spotify", "error");
+            return [];
+        }
+    }
+
+    try {
+        const response = await fetch(
+            `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=playlist&limit=5`,
+            {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            }
+        );
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        // Verificar que tenemos los datos que esperamos
+        if (!data.playlists || !data.playlists.items) {
+            console.error("Formato de respuesta inesperado:", data);
+            return [];
+        }
+        
+        return data.playlists.items;
+    } catch (error) {
+        console.error("Error al buscar playlists:", error);
+        updateGameStatus("Error al buscar playlists", "error");
+        return [];
+    }
+}
+
+
+function initializePlaylistSearch() {
+    // Insertar el HTML de búsqueda después del input de playlist existente
+    const playlistInput = document.getElementById("playlistIdInput");
+    if (!playlistInput) {
+        console.error("No se encontró el elemento playlistIdInput");
+        return;
+    }
+    
+    playlistInput.insertAdjacentHTML('afterend', `
+        <div id="playlistSearchContainer">
+            <input 
+                type="text" 
+                id="playlistSearchInput" 
+                class="form-control" 
+                placeholder="Buscar playlist (ej: top 100 rock)"
+            >
+            <div id="playlistSearchResults" class="playlist-results-container"></div>
+        </div>
+    `);
+    
+    // Configurar el evento de búsqueda con debounce
+    let timeout;
+    const searchInput = document.getElementById("playlistSearchInput");
+    if (searchInput) {
+        searchInput.addEventListener("input", (e) => {
+            clearTimeout(timeout);
+            const query = e.target.value.trim();
+            
+            if (query.length < 3) {
+                document.getElementById("playlistSearchResults").innerHTML = "";
+                return;
+            }
+            
+            timeout = setTimeout(async () => {
+                const playlists = await searchPlaylists(query);
+                displayPlaylistResults(playlists);
+            }, 500);
+        });
+    }
+}
+
+// Llamar a esta función cuando se cargue la página
+document.addEventListener("DOMContentLoaded", initializePlaylistSearch);
+
 async function newGame() {
     resetGameUI();  // Llamada a una función que resetee la UI del juego
     updateGameStatus('Cargando nueva canción...');

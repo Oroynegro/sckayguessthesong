@@ -239,6 +239,133 @@ input:disabled {
     z-index: 2; /* Asegura que el recuadro esté encima del iframe */
 }
 
+/* Contenedor de resultados de búsqueda de artistas */
+.artist-results-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Diseño de cuadrícula adaptable */
+    gap: 16px;
+    padding: 20px;
+    background-color: #282828; /* Fondo oscuro */
+}
+
+/* Cada tarjeta de artista */
+.artist-result {
+    background-color: #181818; /* Fondo ligeramente más claro */
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.3s, box-shadow 0.3s;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 12px;
+}
+
+.artist-result:hover {
+    transform: scale(1.05); /* Efecto de aumento */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); /* Sombra al pasar el cursor */
+}
+
+/* Imagen del artista */
+.artist-thumbnail {
+    width: 100px; /* Tamaño consistente para imágenes de artista */
+    height: 100px;
+    object-fit: cover;
+    border-radius: 50%; /* Imágenes circulares */
+    background-color: #282828; /* Fondo en caso de que no cargue la imagen */
+    margin-bottom: 12px; /* Espaciado debajo de la imagen */
+}
+
+/* Información del artista */
+.artist-info {
+    color: #fff; /* Texto blanco */
+}
+
+.artist-info h4 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.artist-info p {
+    margin: 4px 0 0;
+    font-size: 14px;
+    color: #b3b3b3; /* Texto gris claro */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
+/* Contenedor de resultados de búsqueda de playlist */
+.playlist-results-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); /* Ajuste de tamaño mínimo */
+    gap: 16px;
+    padding: 20px;
+    background-color: #282828; /* Fondo oscuro */
+}
+
+#playlistSearchInput{
+    margin-top: 10px;
+}
+/* Cada tarjeta de playlist */
+.playlist-result {
+    background-color: #181818; /* Fondo ligeramente más claro */
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.3s, box-shadow 0.3s;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    width: 100%; /* Asegurar que se adapta al grid */
+}
+
+.playlist-result:hover {
+    transform: scale(1.05); /* Efecto de aumento */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); /* Sombra al pasar el cursor */
+}
+
+/* Imagen de la playlist */
+.playlist-thumbnail {
+    width: 100%; /* Ocupa todo el ancho de la tarjeta */
+    aspect-ratio: 1; /* Mantener proporción cuadrada */
+    object-fit: cover; /* Ajustar imagen sin deformarla */
+    background-color: #282828; /* Fondo en caso de que no cargue la imagen */
+    border-bottom: 2px solid #121212; /* Separador sutil */
+}
+
+/* Información de la playlist */
+.playlist-info {
+    padding: 12px;
+    color: #fff; /* Texto blanco */
+    flex-direction: column;
+    gap: 4px; /* Espaciado entre texto */
+}
+
+.playlist-info h4 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.playlist-info p {
+    margin: 0;
+    font-size: 12px;
+    color: #b3b3b3; /* Texto gris claro */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
 @media (max-width: 600px) {
     .game-info {
         flex-direction: column;
