@@ -393,7 +393,24 @@ function showFinalResults() {
         document.getElementById('answerContainer').style.display = 'block';
     }
     
+// Función para extraer el ID de la playlist
+function extractPlaylistId(input) {
+    // Si el input está vacío, retornar el ID por defecto
+    if (!input) return "2TieOXUFdPe8OrB8WYgKJy";
 
+    // Si es una URL de Spotify
+    if (input.includes('spotify.com/playlist/')) {
+        // Extraer el ID después de /playlist/
+        const match = input.match(/playlist\/([a-zA-Z0-9]+)/);
+        if (match) {
+            // Remover cualquier parámetro adicional después del ID
+            return match[1].split('?')[0];
+        }
+    }
+    
+    // Si no es una URL, asumimos que es un ID directo
+    return input.split('?')[0]; // Remover cualquier parámetro adicional
+}
 
 async function newGame() {
     resetGameUI();  // Llamada a una función que resetee la UI del juego
@@ -401,9 +418,9 @@ async function newGame() {
 
     const selectionType = document.getElementById('selectionType').value;
 
-    if (selectionType === 'playlist') {
-        const playlistIdInput = document.getElementById('playlistIdInput').value.trim();
-        playlistId = playlistIdInput || playlistId; // Usa el nuevo ID si está definido
+    if (selectionType === "playlist") {
+        const playlistInput = document.getElementById("playlistIdInput").value.trim();
+        playlistId = extractPlaylistId(playlistInput) || playlistId;
         currentTrack = await getRandomTrack();
     } else {
         const artistName = document.getElementById('artistNameInput').value.trim();
