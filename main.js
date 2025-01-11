@@ -72,6 +72,7 @@ function actualizarMaximo() {
         document.getElementById("gameMode").value === "multi" &&
         document.getElementById("difficultySelect").value === "normal"
     ) {
+        document.getElementById("player2").style.display = "block";
         roundsInput.max = 5;
         console.log("Max value set to 5");
     } else {
