@@ -267,7 +267,8 @@ function endRound(isCorrect) {
     } else {
         const correctAnswer = gameConfig.category === 'song' ? 
             currentTrack.name : currentTrack.artists[0].name;
-        updateGameStatus(`¡Incorrecto! no era: ${guessInputShow}, era: ${correctAnswer}`, 'incorrect');
+        updateGameStatus(`¡Incorrecto! no era: <h2 class="answer-submited">${guessInputShow}</h2> era: <h2 class="answer-submited">${correctAnswer}</h2>`,
+        "incorrect");
     }
 
     updateScores();
@@ -378,11 +379,11 @@ function showFinalResults() {
     });
 }
     
-    function updateGameStatus(message, status) {
-        const gameStatus = document.getElementById('gameStatus');
-        gameStatus.textContent = message;
-        gameStatus.className = `game-status ${status}`;
-    }
+function updateGameStatus(message, status) {
+    const gameStatus = document.getElementById("gameStatus");
+    gameStatus.innerHTML = message; // Cambiamos textContent a innerHTML
+    gameStatus.className = `game-status ${status}`;
+}
     
     function displaySongInfo() {
         const songInfo = document.getElementById('songInfo');

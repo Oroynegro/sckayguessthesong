@@ -11,7 +11,7 @@ body {
     padding: 20px;
 }
 #submitGuess {
-    background-color: #1ed760;
+    background-color: #282828;
 }
 #title{
     font-size: 2em;
@@ -188,6 +188,9 @@ input {
     border-radius: 20px;
     margin-right: 10px;
     font-size: 1em;
+}
+.answer-submited{
+    color: #1ed760;
 }
 #guessInput {
     width: 400px;
@@ -389,5 +392,8 @@ input:disabled {
     }
     .overlay {
         width: 86%;
+    }
+    #submitGuess {
+        background-color: #1ed760;
     }
 }
