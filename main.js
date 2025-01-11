@@ -493,6 +493,7 @@ function updateGameStatus(message, status) {
 
 
 function displaySongInfo() {
+    document.getElementById("playInstruction").style.display = "none";
     const songInfo = document.getElementById("songInfo");
     songInfo.innerHTML = `
             <p><strong>Canción:</strong> ${currentTrack.name}</p>

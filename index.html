@@ -68,8 +68,12 @@
                     <div class="category-select">
                         <label>Categoría:</label>
                         <select id="gameCategory">
-                            <option value="song" id="guessTheSong">Adivina la Canción</option>
-                            <option value="artist" id="guessTheArtist">Adivina el Artista</option>
+                            <option value="song" id="guessTheSong">
+                                Adivina la Canción
+                            </option>
+                            <option value="artist" id="guessTheArtist">
+                                Adivina el Artista
+                            </option>
                         </select>
                     </div>
                     <div>
@@ -89,7 +93,9 @@
                         />
                     </div>
                     <div id="playlistSelection" style="display: none">
-                        <label for="playlistIdInput">URL o ID de la Playlist:</label>
+                        <label for="playlistIdInput"
+                            >URL o ID de la Playlist:</label
+                        >
                         <input
                             type="text"
                             id="playlistIdInput"
@@ -114,32 +120,48 @@
                     </div>
                     <div id="player1Score" class="score-container">
                         <div class="player-info">
-                            <span class="player-name">${gameConfig.players.player1.name}</span>
+                            <span class="player-name"
+                                >${gameConfig.players.player1.name}</span
+                            >
                             <span class="separator-1">:</span>
-                            <span class="score">${gameConfig.players.player1.score}</span>
+                            <span class="score"
+                                >${gameConfig.players.player1.score}</span
+                            >
                             <span class="emoji fire">🔥</span>
                         </div>
                         <div class="player-stats">
-                            <span class="correct-answer">${gameConfig.players.player1.correctAnswers}</span>
+                            <span class="correct-answer"
+                                >${gameConfig.players.player1.correctAnswers}</span
+                            >
                             <span class="separator-2">/</span>
-                            <span class="total-rounds">${gameConfig.rounds}</span>
+                            <span class="total-rounds"
+                                >${gameConfig.rounds}</span
+                            >
                         </div>
                     </div>
-                    
+
                     <div id="player2Score" class="score-container">
                         <div class="player-info">
-                            <span class="player-name">${gameConfig.players.player2.name}</span>
+                            <span class="player-name"
+                                >${gameConfig.players.player2.name}</span
+                            >
                             <span class="separator-1">:</span>
-                            <span class="score">${gameConfig.players.player2.score}</span>
+                            <span class="score"
+                                >${gameConfig.players.player2.score}</span
+                            >
                             <span class="emoji fire">🔥</span>
                         </div>
                         <div class="player-stats">
-                            <span class="correct-answer">${gameConfig.players.player2.correctAnswers}</span>
+                            <span class="correct-answer"
+                                >${gameConfig.players.player2.correctAnswers}</span
+                            >
                             <span class="separator-2">/</span>
-                            <span class="total-rounds">${gameConfig.rounds}</span>
+                            <span class="total-rounds"
+                                >${gameConfig.rounds}</span
+                            >
                         </div>
                     </div>
-                    
+
                     <div id="currentPlayer"></div>
                 </div>
 
@@ -150,24 +172,32 @@
                 <div class="timer" id="timer">25</div>
 
                 <div class="player-container-container">
-                    
                     <div id="playerContainer" class="player-container"></div>
-                    <div class="overlay"><div class="guess-container">
-                        <input
-                            type="text"
-                            id="guessInput"
-                            placeholder="Escribe el nombre de la canción..."
-                            disabled
-                        />
-                        <button
-                            id="submitGuess"
-                            onclick="checkGuess()"
-                            disabled
-                        >
-                            Adivinar
-                        </button>
-                    </div></div>
+                    <div class="overlay">
+                        <div class="guess-container">
+                            <input
+                                type="text"
+                                id="guessInput"
+                                placeholder="Escribe el nombre de la canción..."
+                                disabled
+                            />
+                            <button
+                                id="submitGuess"
+                                onclick="checkGuess()"
+                                disabled
+                            >
+                                Adivinar
+                            </button>
+                        </div>
+                    </div>
                 </div>
+                <!-- Nueva flecha con texto -->
+    <div class="play-instruction" id="playInstruction">
+        <div class="arrow">
+            <img class="arrow" src="noun-hand-drawn-arrow-2092497.svg" alt="">
+        </div>
+        <span>Dale play</span>
+    </div>
 
                 <div class="answer-container" id="answerContainer">
                     <div class="song-info" id="songInfo"></div>
@@ -184,4 +214,3 @@
         <script src="./main.js"></script>
     </body>
 </html>
-
