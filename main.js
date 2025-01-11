@@ -267,21 +267,24 @@ function checkGuess() {
         return;
     }
 
+    // Determinar la respuesta correcta según la categoría
     if (gameConfig.category === "song") {
         correctAnswer = normalizeString(currentTrack.name);
-        isCorrect =
-            guess.length > 0 &&
-            (guess === correctAnswer ||
-                correctAnswer.includes(guess) ||
-                guess.includes(correctAnswer));
     } else {
         correctAnswer = normalizeString(currentTrack.artists[0].name);
-        isCorrect =
-            guess.length > 0 &&
-            (guess === correctAnswer ||
-                correctAnswer.includes(guess) ||
-                guess.includes(correctAnswer));
     }
+
+    // Comparar con reglas de coincidencia parcial
+    const minLength = 3; // Longitud mínima para coincidencias parciales
+    isCorrect =
+        guess === correctAnswer || // Coincidencia exacta
+        (guess.length >= minLength && correctAnswer.includes(guess)) || // Guess incluido en la respuesta
+        (correctAnswer.length >= minLength && guess.includes(correctAnswer)); // Respuesta incluida en guess
+
+    // Depuración
+    console.log("Guess:", guess);
+    console.log("Correct Answer:", correctAnswer);
+    console.log("Is Correct:", isCorrect);
 
     clearInterval(timerInterval);
     endRound(isCorrect);
