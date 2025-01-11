@@ -148,6 +148,8 @@ function initializeGame() {
             document.getElementById("player2").value || "Jugador 2";
         document.getElementById("player2Score").style.display = "block";
     } else {
+        gameConfig.players.player1.name =
+        document.getElementById("player1").value || "Jugador 1";
         document.getElementById("player2Score").style.display = "none";
     }
 
