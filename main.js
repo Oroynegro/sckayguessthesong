@@ -229,17 +229,28 @@ async function getRandomTrack() {
 }
 
 function updatePlayer(trackId) {
-    const playerContainer = document.getElementById("playerContainer");
-    playerContainer.innerHTML = `
-        <iframe
-            src="https://open.spotify.com/embed/track/${trackId}?utm_source=generator"
-            width="100%"
-            height="100px"
-            frameBorder="0"
-            allow="clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-            loading="lazy"
-        ></iframe>
-    `;
+    return new Promise((resolve) => {
+        const playerContainer = document.getElementById("playerContainer");
+        
+        // Crear el iframe
+        const iframe = document.createElement('iframe');
+        iframe.src = `https://open.spotify.com/embed/track/${trackId}?utm_source=generator`;
+        iframe.width = "100%";
+        iframe.height = "100px";
+        iframe.frameBorder = "0";
+        iframe.allow = "clipboard-write; encrypted-media; fullscreen; picture-in-picture";
+        iframe.loading = "lazy";
+        
+        // Agregar el evento de carga
+        iframe.onload = () => {
+            console.log('Spotify player loaded');
+            resolve();
+        };
+        
+        // Limpiar y agregar el nuevo iframe
+        playerContainer.innerHTML = '';
+        playerContainer.appendChild(iframe);
+    });
 }
 function normalizeString(str) {
     return str
@@ -784,64 +795,82 @@ async function newGame() {
     resetGameUI();
     updateGameStatus("Cargando nueva canción...");
 
+    // Deshabilitar controles durante la carga
+    document.getElementById("guessInput").disabled = true;
+    document.getElementById("submitGuess").disabled = true;
+
     const selectionType = document.getElementById("selectionType").value;
 
-    if (selectionType === "playlist") {
-        const playlistInput = document
-            .getElementById("playlistIdInput")
-            .value.trim();
-        playlistId = extractPlaylistId(playlistInput) || playlistId;
-        currentTrack = await getRandomTrack();
-    } else {
-        const artistName = document
-            .getElementById("artistNameInput")
-            .value.trim();
+    try {
+        if (selectionType === "playlist") {
+            const playlistInput = document
+                .getElementById("playlistIdInput")
+                .value.trim();
+            playlistId = extractPlaylistId(playlistInput) || playlistId;
+            currentTrack = await getRandomTrack();
+        } else {
+            const artistName = document
+                .getElementById("artistNameInput")
+                .value.trim();
 
-        // Llamar a resetArtistTracks para limpiar canciones de un artista previo
-        resetArtistTracks();
+            // Llamar a resetArtistTracks para limpiar canciones de un artista previo
+            resetArtistTracks();
 
-        const artistTracks = await getTracksByArtist(artistName);
+            const artistTracks = await getTracksByArtist(artistName);
 
-        if (!artistTracks || artistTracks.length === 0) {
-            updateGameStatus(
-                "No se encontraron canciones para el artista",
-                "error"
+            if (!artistTracks || artistTracks.length === 0) {
+                updateGameStatus(
+                    "No se encontraron canciones para el artista",
+                    "error"
+                );
+                return;
+            }
+
+            // Filtrar canciones ya usadas
+            const availableTracks = artistTracks.filter(
+                (track) => !gameConfig.usedTracks.has(track.id)
             );
+            if (availableTracks.length === 0) {
+                updateGameStatus("¡No hay más canciones disponibles!", "error");
+                return;
+            }
+
+            currentTrack =
+                availableTracks[Math.floor(Math.random() * availableTracks.length)];
+            gameConfig.usedTracks.add(currentTrack.id);
+        }
+
+        if (!currentTrack) {
             return;
         }
 
-        // Filtrar canciones ya usadas
-        const availableTracks = artistTracks.filter(
-            (track) => !gameConfig.usedTracks.has(track.id)
-        );
-        if (availableTracks.length === 0) {
-            updateGameStatus("¡No hay más canciones disponibles!", "error");
-            return;
-        }
-
-        currentTrack =
-            availableTracks[Math.floor(Math.random() * availableTracks.length)];
-        gameConfig.usedTracks.add(currentTrack.id);
+        // Esperar a que el reproductor se cargue completamente
+        await updatePlayer(currentTrack.id);
+        
+        // Una vez cargado el reproductor, habilitar controles e iniciar el timer
+        document.getElementById("guessInput").disabled = false;
+        document.getElementById("submitGuess").disabled = false;
+        document.getElementById("guessInput").focus();
+        
+        startTimer();
+        updateGameStatus("¡Escucha y adivina!");
+    } catch (error) {
+        console.error("Error en newGame:", error);
+        updateGameStatus("Error al cargar la canción", "error");
+        // Asegurar que los controles estén habilitados en caso de error
+        document.getElementById("guessInput").disabled = false;
+        document.getElementById("submitGuess").disabled = false;
     }
-
-    if (!currentTrack) {
-        return;
-    }
-
-    updatePlayer(currentTrack.id);
-    document.getElementById("guessInput").disabled = false;
-    document.getElementById("submitGuess").disabled = false;
-    startTimer();
-    updateGameStatus("¡Escucha y adivina!");
 }
 
 function resetArtistTracks() {
     allTracks = []; // Limpiar las canciones almacenadas
 }
 
+// Actualizar la función de startTimer (mantener la versión modificada anterior)
 function startTimer() {
     const timer = document.getElementById("timer");
-    timeLeft = 25; // Reinicia el tiempo cada vez que empieza una nueva ronda
+    timeLeft = 25;
     timer.textContent = timeLeft;
 
     timerInterval = setInterval(() => {
@@ -850,8 +879,7 @@ function startTimer() {
 
         if (timeLeft <= 0) {
             clearInterval(timerInterval);
-            // En lugar de llamar directamente a endRound, llamamos a checkGuess
-            checkGuess(true); // Pasamos true para indicar que es una verificación por tiempo
+            checkGuess(true);
         }
     }, 1000);
 }
