@@ -43,7 +43,9 @@ async function getTracksByArtist(artistName) {
 
     // Verificar si ya tenemos canciones en caché para este artista y dificultad
     if (artistTracksCache[artistName]?.[difficulty]) {
-        
+        console.log(
+            `Usando canciones en caché para el artista: ${artistName}, dificultad: ${difficulty}`
+        );
         return artistTracksCache[artistName][difficulty];
     }
 
@@ -106,6 +108,17 @@ async function getTracksByArtist(artistName) {
         }
         artistTracksCache[artistName][difficulty] = tracks;
 
+        // Mostrar cuántas canciones y detalles en la consola
+        console.log(
+            `Se obtuvieron ${tracks.length} canciones para el artista ${artistName}, dificultad: ${difficulty}`
+        );
+        tracks.forEach((track, index) => {
+            console.log(
+                `${index + 1}. ${track.name} - ${track.artists
+                    .map((artist) => artist.name)
+                    .join(", ")}`
+            );
+        });
 
         return tracks;
     } catch (error) {
@@ -291,6 +304,7 @@ function checkGuess() {
     guessInput.value = "";
 }
 
+
 let timeLeft = 25;  // Tiempo inicial del temporizador
 
 
@@ -303,17 +317,17 @@ function endRound(isCorrect) {
     // Calcular los puntos por tiempo restante
     let pointsForTime = 0;
     if (timeLeft > 20) {
-        pointsForTime = 100;  // Si quedan más de 20 segundos, da 100 puntos extra
+        pointsForTime = 200;  // Si quedan más de 20 segundos, da 100 puntos extra
     } else if (timeLeft > 10) {
-        pointsForTime = 75;   // Si quedan entre 10 y 20 segundos, da 75 puntos extra
+        pointsForTime = 150;   // Si quedan entre 10 y 20 segundos, da 75 puntos extra
     } else if (timeLeft > 5) {
-        pointsForTime = 50;   // Si quedan entre 5 y 10 segundos, da 50 puntos extra
+        pointsForTime = 100;   // Si quedan entre 5 y 10 segundos, da 50 puntos extra
     } else if (timeLeft > 0) {
-        pointsForTime = 25;   // Si quedan menos de 5 segundos, da 25 puntos extra
+        pointsForTime = 50;   // Si quedan menos de 5 segundos, da 25 puntos extra
     }
 
     if (isCorrect) {
-        gameConfig.players[gameConfig.currentPlayer].score += 100 + pointsForTime; // 100 puntos por respuesta correcta + puntos por tiempo
+        gameConfig.players[gameConfig.currentPlayer].score += 300 + pointsForTime; // 100 puntos por respuesta correcta + puntos por tiempo
         gameConfig.players[gameConfig.currentPlayer].correctAnswers += 1; // Incrementa los aciertos
         updateGameStatus("¡Correcto! 🎉", "correct");
     } else {
@@ -321,6 +335,8 @@ function endRound(isCorrect) {
             gameConfig.category === "song"
                 ? currentTrack.name
                 : currentTrack.artists[0].name;
+            // Restar 50 puntos por respuesta incorrecta
+        gameConfig.players[gameConfig.currentPlayer].score -= 50;
         updateGameStatus(
             `¡Incorrecto! no era: <h2 class="answer-submited">${guessInputShow}</h2> era: <h2 class="answer-submited">${correctAnswer}</h2>`,
             "incorrect"
@@ -844,6 +860,7 @@ function startTimer() {
 
 function resetGameUI() {
     document.getElementById("answerContainer").style.display = "none";
+    document.getElementById("playInstruction").style.display = "flex"
     document.getElementById("songInfo").innerHTML = "";
 }
 
