@@ -43,9 +43,7 @@ async function getTracksByArtist(artistName) {
 
     // Verificar si ya tenemos canciones en caché para este artista y dificultad
     if (artistTracksCache[artistName]?.[difficulty]) {
-        console.log(
-            `Usando canciones en caché para el artista: ${artistName}, dificultad: ${difficulty}`
-        );
+        
         return artistTracksCache[artistName][difficulty];
     }
 
@@ -108,17 +106,6 @@ async function getTracksByArtist(artistName) {
         }
         artistTracksCache[artistName][difficulty] = tracks;
 
-        // Mostrar cuántas canciones y detalles en la consola
-        console.log(
-            `Se obtuvieron ${tracks.length} canciones para el artista ${artistName}, dificultad: ${difficulty}`
-        );
-        tracks.forEach((track, index) => {
-            console.log(
-                `${index + 1}. ${track.name} - ${track.artists
-                    .map((artist) => artist.name)
-                    .join(", ")}`
-            );
-        });
 
         return tracks;
     } catch (error) {
@@ -294,10 +281,6 @@ function checkGuess() {
         (guess.length >= minLength && correctAnswer.includes(guess)) || // Guess incluido en la respuesta
         (correctAnswer.length >= minLength && guess.includes(correctAnswer)); // Respuesta incluida en guess
 
-    // Depuración
-    console.log("Guess:", guess);
-    console.log("Correct Answer:", correctAnswer);
-    console.log("Is Correct:", isCorrect);
 
     clearInterval(timerInterval);
     endRound(isCorrect);
@@ -335,8 +318,10 @@ function endRound(isCorrect) {
             gameConfig.category === "song"
                 ? currentTrack.name
                 : currentTrack.artists[0].name;
-            // Restar 50 puntos por respuesta incorrecta
-        gameConfig.players[gameConfig.currentPlayer].score -= 50;
+                        // Restar 50 puntos por respuesta incorrecta
+        if (gameConfig.players[gameConfig.currentPlayer].score > 0){
+            gameConfig.players[gameConfig.currentPlayer].score -= 50;
+        }
         updateGameStatus(
             `¡Incorrecto! no era: <h2 class="answer-submited">${guessInputShow}</h2> era: <h2 class="answer-submited">${correctAnswer}</h2>`,
             "incorrect"
