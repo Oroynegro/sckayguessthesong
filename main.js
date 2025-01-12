@@ -24,10 +24,6 @@ let gameConfig = {
 // Función para generar opciones múltiples
 async function generateMultipleChoiceOptions(correctTrack, allTracks) {
     const options = new Set();
-    const option = gameConfig.category === "song" 
-    ? randomTrack.name 
-    : randomTrack.artists[0].name;
-
     const correctOption = gameConfig.category === "song" ? correctTrack.name : correctTrack.artists[0].name;
     options.add(correctOption);
     
@@ -1012,8 +1008,8 @@ async function newGame() {
                     artistTracks
                 );
                 displayMultipleChoiceOptions(gameConfig.options);
+
             }
-            
         }
 
         if (!currentTrack) return;
