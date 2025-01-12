@@ -77,6 +77,7 @@ function actualizarMaximo() {
         roundsInput.max = 5;
         console.log("Max value set to 5");
     } else {
+        document.getElementById("player1").style.display = "block";
         roundsInput.max = 1000;
         console.log("Max value set to 1000");
     }
