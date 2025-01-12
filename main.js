@@ -432,7 +432,7 @@ function nextRound() {
 function updateScores() {
     document.getElementById("player1Score").innerHTML = `
         <div class="player-info">
-            <span class="player-name">${gameConfig.players.player1.name}</span><span class="separator-1">:</span> <span class="score">${gameConfig.players.player1.score}</span><span class="emoji"><img src="music11.svg" alt="puntos" class="svg-points"/></span>
+            <span class="player-name">${gameConfig.players.player1.name}</span><span class="separator-1">:</span> <span class="score">${gameConfig.players.player1.score}</span><span class="emoji"><img src="points.svg" alt="puntos" class="svg-points"/></span>
         </div>
         <div class="player-stats">
             <span class="correct-answer">${gameConfig.players.player1.correctAnswers}</span><span class="separator-2">/</span><span class="total-rounds">${gameConfig.rounds}</span>
@@ -442,7 +442,7 @@ function updateScores() {
     if (gameConfig.mode === "multi") {
         document.getElementById("player2Score").innerHTML = `
         <div class="player-info">
-            <span class="player-name">${gameConfig.players.player2.name}</span><span class="separator-1">: </span><span class="score">${gameConfig.players.player2.score}</span><span class="emoji"><img src="music11.svg" alt="puntos" class="svg-points"/></span>
+            <span class="player-name">${gameConfig.players.player2.name}</span><span class="separator-1">: </span><span class="score">${gameConfig.players.player2.score}</span><span class="emoji"><img src="points.svg" alt="puntos" class="svg-points"/></span>
         </div>
         <div class="player-stats">
             <span class="correct-answer">${gameConfig.players.player2.correctAnswers}</span><span class="separator-2">/</span><span class="total-rounds">${gameConfig.rounds}</span>
@@ -500,7 +500,7 @@ function showFinalResults() {
             <span class="player-name-final">${gameConfig.players.player1.name}</span>
             <span class="separator-1-final">:</span>
             <span class="score-final">${gameConfig.players.player1.score}</span>
-            <span class="emoji-final"><img src="music11.svg" alt="puntos" class="svg-points-final"/></span>
+            <span class="emoji-final"><img src="points.svg" alt="puntos" class="svg-points-final"/></span>
         </div>
         <div class="player-stats-final">
             <span class="correct-answer-final">${gameConfig.players.player1.correctAnswers}</span>
@@ -515,7 +515,7 @@ function showFinalResults() {
                 <span class="player-name-final">${gameConfig.players.player2.name}</span>
                 <span class="separator-1-final">:</span>
                 <span class="score-final">${gameConfig.players.player2.score}</span>
-                <span class="emoji-final"><img src="music11.svg" alt="puntos" class="svg-points-final"/></span>
+                <span class="emoji-final"><img src="points.svg" alt="puntos" class="svg-points-final"/></span>
             </div>
             <div class="player-stats-final">
                 <span class="correct-answer-final">${gameConfig.players.player2.correctAnswers}</span>
