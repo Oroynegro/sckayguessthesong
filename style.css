@@ -5,6 +5,52 @@
     font-family: "Audiowide", serif;
 }
 
+.options-container {
+    width: 100%;
+    padding: 10px;
+    margin-top: -30px;
+}
+
+.options-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.option-button {
+    padding: 15px;
+    font-size: 16px;
+    text-align: center;
+    white-space: normal;
+    height: auto;
+    min-height: 60px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.option-button:hover:not(:disabled) {
+    background-color: #61d88b;
+    color: white;
+}
+
+.option-button:disabled {
+    opacity: 0.8;
+    cursor: not-allowed;
+}
+
+.correct-option {
+    background-color: #28a745 !important;
+    color: white !important;
+    border-color: #28a745 !important;
+}
+
+.incorrect-option {
+    background-color: #dc3545 !important;
+    color: white !important;
+    border-color: #dc3545 !important;
+}
+
 body {
     background: #121212;
     color: white;
@@ -464,7 +510,7 @@ input:disabled {
         gap: 10px;
     }
     .song-info {
-        margin-top: 70px;
+        margin-top: 110px;
     }
     .player-names {
         flex-direction: column;
@@ -481,6 +527,8 @@ input:disabled {
     }
     .overlay {
         width: 86%;
+        background-color: #282828;
+        border-radius: 0;
     }
     #submitGuess {
         background-color: #1ed760;
@@ -558,10 +606,26 @@ input:disabled {
         margin-bottom: 20px;
     }
     .play-instruction {
-        margin-left: 90%;
+        margin-left: 89%;
         margin-top: -20px;
     }
     .answer-submited {
         font-size: 1em;
+    }
+    .options-grid {
+        margin: 0;
+    }
+    .option-button {
+        font-size: 0.7em;
+        min-height: 60px;
+    }
+    .options-container {
+        width: 100%;
+        padding: 10px;
+        margin-top: -10px;
+    }
+    .guess-container {
+        margin: 0;
+        
     }
 }

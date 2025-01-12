@@ -5,19 +5,91 @@ let player = null;
 let playlistId = "2TieOXUFdPe8OrB8WYgKJy?si=5iJTAhqeQYWRAJj2HZf3kA";
 let allTracks = []; // Variable global para almacenar todas las canciones
 
-// Variables para el nuevo sistema de juego
+// Primero, modificar el gameConfig existente
 let gameConfig = {
     mode: "single",
     rounds: 5,
     category: "song",
     currentRound: 1,
     usedTracks: new Set(),
+    answerMode: "text", // Nuevo campo para el modo de respuesta
+    options: [], // Almacenará las opciones para el modo múltiple
     players: {
         player1: { name: "Jugador 1", score: 0, correctAnswers: 0 },
         player2: { name: "Jugador 2", score: 0, correctAnswers: 0 },
     },
     currentPlayer: "player1",
 };
+
+// Función para generar opciones múltiples
+async function generateMultipleChoiceOptions(correctTrack, allTracks) {
+    const options = new Set();
+    const option = gameConfig.category === "song" 
+    ? randomTrack.name 
+    : randomTrack.artists[0].name;
+
+    const correctOption = gameConfig.category === "song" ? correctTrack.name : correctTrack.artists[0].name;
+    options.add(correctOption);
+    
+    // Crear una copia de todas las pistas para manipular
+    let availableTracks = [...allTracks];
+    
+    // Remover la pista correcta de las disponibles
+    availableTracks = availableTracks.filter(track => track.id !== correctTrack.id);
+    
+    // Si quedan menos de 3 pistas disponibles sin usar, permitir reutilizar pistas
+    const unusedTracks = availableTracks.filter(track => !gameConfig.usedTracks.has(track.id));
+    const tracksToUse = unusedTracks.length < 3 ? availableTracks : unusedTracks;
+    
+    // Intentar obtener 3 opciones adicionales
+    while(options.size < 4 && tracksToUse.length > 0) {
+        const randomIndex = Math.floor(Math.random() * tracksToUse.length);
+        const randomTrack = tracksToUse[randomIndex];
+        const option = gameConfig.category === "song" ? 
+            randomTrack.name : 
+            randomTrack.artists[0].name;
+        
+        // Agregar la opción si no es igual a la correcta
+        if (normalizeString(option) !== normalizeString(correctOption)) {
+            options.add(option);
+        }
+        
+        // Remover la pista usada del array de disponibles
+        tracksToUse.splice(randomIndex, 1);
+    }
+    
+    // Si aún no tenemos 4 opciones, rellenar con valores del array original
+    if (options.size < 4) {
+        const remainingTracks = allTracks.filter(track => 
+            track.id !== correctTrack.id && 
+            !Array.from(options).includes(gameConfig.category === "song" ? track.name : track.artists[0].name)
+        );
+        
+        while(options.size < 4 && remainingTracks.length > 0) {
+            const randomIndex = Math.floor(Math.random() * remainingTracks.length);
+            const randomTrack = remainingTracks[randomIndex];
+            const option = gameConfig.category === "song" ? 
+                randomTrack.name : 
+                randomTrack.artists[0].name;
+            
+            if (normalizeString(option) !== normalizeString(correctOption)) {
+                options.add(option);
+            }
+            remainingTracks.splice(randomIndex, 1);
+        }
+    }
+    
+    return shuffleArray([...options]);
+}
+// Función para mezclar array
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
 document
     .getElementById("selectionType")
     .addEventListener("change", function (e) {
@@ -105,6 +177,18 @@ async function getTracksByArtist(artistName) {
         }
         artistTracksCache[artistName][difficulty] = tracks;
 
+        // Mostrar cuántas canciones y detalles en la consola
+        console.log(
+            `Se obtuvieron ${tracks.length} canciones para el artista ${artistName}, dificultad: ${difficulty}`
+        );
+        tracks.forEach((track, index) => {
+            console.log(
+                `${index + 1}. ${track.name} - ${track.artists
+                    .map((artist) => artist.name)
+                    .join(", ")}`
+            );
+        });
+
         return tracks;
     } catch (error) {
         console.error("Error al obtener las canciones del artista:", error);
@@ -130,11 +214,18 @@ document.getElementById("roundsNumber").addEventListener("input", function () {
 
     if (currentValue > max) {
         this.value = max; // Ajustar el valor al máximo permitido si lo excede
+        console.log("Valor ajustado al máximo permitido:", max);
     }
 });
 
 // Función para actualizar el valor máximo basado en modo y dificultad
 function actualizarMaximo() {
+    console.log(
+        "Valor difficultySelect:",
+        document.getElementById("difficultySelect").value
+    );
+    console.log("Valor gameMode:", document.getElementById("gameMode").value);
+
     const roundsInput = document.getElementById("roundsNumber");
 
     if (
@@ -142,21 +233,23 @@ function actualizarMaximo() {
         document.getElementById("difficultySelect").value === "normal"
     ) {
         roundsInput.max = 10;
+        console.log("Max value set to 10");
     } else if (
         document.getElementById("gameMode").value === "multi" &&
         document.getElementById("difficultySelect").value === "normal"
     ) {
         roundsInput.max = 5;
-
+        console.log("Max value set to 5");
         document.getElementById("player2").style.display = "block";
     } else {
         roundsInput.max = 1000;
+        console.log("Max value set to 1000");
     }
 }
 
-// Función para inicializar el juego
+// Modificar la función initializeGame para incluir el modo de respuesta
 function initializeGame() {
-    const guessTheSong = document.getElementById("guessTheArtist");
+    const guessTheSong = document.getElementById("guessTheSong");
     if (guessTheSong.textContent === "Adivina el Artista") {
         document.getElementById("subtitle").textContent = "GUESS THE ARTIST";
     }
@@ -173,16 +266,19 @@ function initializeGame() {
     }
 
     gameConfig.mode = document.getElementById("gameMode").value;
-    gameConfig.rounds = rounds; // Número de rondas establecido por el usuario
+    gameConfig.rounds = rounds;
     gameConfig.currentRound = 1;
     gameConfig.usedTracks.clear();
     gameConfig.players.player1.score = 0;
     gameConfig.players.player2.score = 0;
     gameConfig.currentPlayer = "player1";
-    gameConfig.totalRounds = gameConfig.mode === "multi" ? rounds * 2 : rounds; // Ajuste para multijugador
+    gameConfig.totalRounds = gameConfig.mode === "multi" ? rounds * 2 : rounds;
     gameConfig.category = document.getElementById("gameCategory").value;
+    gameConfig.answerMode = document.getElementById("answerMode").value; // Nuevo
 
-    // Configurar nombres de jugadores
+    // Configurar la UI según el modo de respuesta
+    setupAnswerMode();
+
     if (gameConfig.mode === "multi") {
         gameConfig.players.player1.name =
             document.getElementById("player1").value || "Jugador 1";
@@ -195,15 +291,6 @@ function initializeGame() {
         document.getElementById("player2Score").style.display = "none";
     }
 
-    // Resetear puntuaciones y ronda actual
-    gameConfig.currentRound = 1;
-    gameConfig.currentTurn = 1; // Turno global
-    gameConfig.usedTracks.clear();
-    gameConfig.players.player1.score = 0;
-    gameConfig.players.player2.score = 0;
-    gameConfig.currentPlayer = "player1";
-
-    // Actualizar UI
     document.getElementById("gameConfig").style.display = "none";
     document.getElementById("gameArea").style.display = "block";
     document.getElementById("currentRound").textContent =
@@ -212,8 +299,32 @@ function initializeGame() {
     updateScores();
     updateCurrentPlayer();
 
-    // Comenzar primera ronda
     newGame();
+}
+// Función para configurar la UI según el modo de respuesta
+function setupAnswerMode() {
+    const guessContainer = document.querySelector(".guess-container");
+    if (gameConfig.answerMode === "choice") {
+        guessContainer.innerHTML = `
+            <div class="options-container">
+                <div class="options-grid"></div>
+            </div>
+        `;
+        const overlay = document.querySelector(".overlay");
+        if (overlay) {
+            overlay.style.backgroundColor = "#282828";
+            overlay.style.borderRadius = "0";
+        }
+        const songInfo = document.querySelector(".song-info")
+        if (songInfo) {
+            songInfo.style.marginTop = "90px";
+        }
+    } else {
+        guessContainer.innerHTML = `
+            <input type="text" id="guessInput" placeholder="Escribe el nombre de la canción..." disabled />
+            <button id="submitGuess" onclick="checkGuess()" disabled>Adivinar</button>
+        `;
+    }
 }
 
 // Event listener para el modo de juego
@@ -224,15 +335,14 @@ document.getElementById("gameMode").addEventListener("change", function (e) {
 
 async function getAccessToken() {
     try {
-        const response = await fetch("/api/getAccessToken");
+        const response = await fetch('/api/getAccessToken');
         const data = await response.json();
         return data.access_token;
     } catch (error) {
-        console.error("Error al obtener el token:", error);
+        console.error('Error al obtener el token:', error);
         return null;
     }
 }
-
 // Usarla directamente en getRandomTrack:
 async function getRandomTrack() {
     if (!accessToken) {
@@ -283,11 +393,12 @@ function updatePlayer(trackId) {
         iframe.height = "100px";
         iframe.frameBorder = "0";
         iframe.allow =
-            "clipboard-write; encrypted-media; fullscreen; picture-in-picture";
+            "autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture";
         iframe.loading = "lazy";
 
         // Agregar el evento de carga
         iframe.onload = () => {
+            console.log("Spotify player loaded");
             resolve();
         };
 
@@ -337,6 +448,11 @@ function checkGuess(isTimeOut = false) {
         (guess.length >= minLength && correctAnswer.includes(guess)) || // Guess incluido en la respuesta
         (correctAnswer.length >= minLength && guess.includes(correctAnswer)); // Respuesta incluida en guess
 
+    // Depuración
+    console.log("Guess:", guess);
+    console.log("Correct Answer:", correctAnswer);
+    console.log("Is Correct:", isCorrect);
+
     clearInterval(timerInterval);
     endRound(isCorrect);
     guessInput.value = "";
@@ -344,52 +460,60 @@ function checkGuess(isTimeOut = false) {
 
 let timeLeft = 25; // Tiempo inicial del temporizador
 
-function endRound(isCorrect) {
-    const guessInputShow = document.getElementById("guessInput").value.trim();
-    document.getElementById("guessInput").disabled = true;
-    document.getElementById("submitGuess").disabled = true;
+function endRound(isCorrect, selectedOption = "") {
+    const guessInputShow =
+        gameConfig.answerMode === "text"
+            ? (document.getElementById("guessInput")?.value || "").trim()
+            : selectedOption;
 
-    // Calcular los puntos por tiempo restante
+    if (
+        gameConfig.answerMode === "text" &&
+        document.getElementById("guessInput")
+    ) {
+        document.getElementById("guessInput").disabled = true;
+        document.getElementById("submitGuess").disabled = true;
+    }
+
     let pointsForTime = 0;
     if (timeLeft > 20) {
-        pointsForTime = 200; // Si quedan más de 20 segundos, da 100 puntos extra
+        pointsForTime = 200;
     } else if (timeLeft > 10) {
-        pointsForTime = 150; // Si quedan entre 10 y 20 segundos, da 75 puntos extra
+        pointsForTime = 150;
     } else if (timeLeft > 5) {
-        pointsForTime = 100; // Si quedan entre 5 y 10 segundos, da 50 puntos extra
+        pointsForTime = 100;
     } else if (timeLeft > 0) {
-        pointsForTime = 50; // Si quedan menos de 5 segundos, da 25 puntos extra
+        pointsForTime = 50;
     }
 
     if (isCorrect) {
         gameConfig.players[gameConfig.currentPlayer].score +=
-            300 + pointsForTime; // 100 puntos por respuesta correcta + puntos por tiempo
-        gameConfig.players[gameConfig.currentPlayer].correctAnswers += 1; // Incrementa los aciertos
+            300 + pointsForTime;
+        gameConfig.players[gameConfig.currentPlayer].correctAnswers += 1;
         updateGameStatus("¡Correcto! 🎉", "correct");
     } else {
         const correctAnswer =
             gameConfig.category === "song"
                 ? currentTrack.name
                 : currentTrack.artists[0].name;
-        // Restar 50 puntos por respuesta incorrecta
+
         if (gameConfig.players[gameConfig.currentPlayer].score > 0) {
             gameConfig.players[gameConfig.currentPlayer].score -= 50;
         }
 
-        updateGameStatus(
-            `¡Incorrecto! no era: <h2 class="answer-submited">${guessInputShow}</h2> era: <h2 class="answer-submited">${correctAnswer}</h2>`,
-            "incorrect"
-        );
+        // Only show the incorrect guess if there was one
+        const incorrectMessage = guessInputShow
+            ? `¡Incorrecto! no era: <h2 class="answer-submited">${guessInputShow}</h2> era: <h2 class="answer-submited">${correctAnswer}</h2>`
+            : `¡Incorrecto! La respuesta correcta era: <h2 class="answer-submited">${correctAnswer}</h2>`;
+
+        updateGameStatus(incorrectMessage, "incorrect");
     }
 
     updateScores();
     displaySongInfo();
 
-    // Preparar siguiente ronda o finalizar juego
     setTimeout(() => {
         if (gameConfig.mode === "multi") {
             if (gameConfig.currentPlayer === "player1" && !isCorrect) {
-                // Si el jugador 1 falló, le toca al jugador 2
                 gameConfig.currentPlayer = "player2";
                 updateCurrentPlayer();
                 newGame();
@@ -404,20 +528,16 @@ function endRound(isCorrect) {
 
 function nextRound() {
     if (gameConfig.mode === "multi") {
-        // Cambiar jugador
         gameConfig.currentPlayer =
             gameConfig.currentPlayer === "player1" ? "player2" : "player1";
 
-        // Solo incrementar la ronda cuando vuelve al primer jugador
         if (gameConfig.currentPlayer === "player1") {
             gameConfig.currentRound++;
         }
     } else {
-        // Modo un jugador - simplemente incrementar la ronda
         gameConfig.currentRound++;
     }
 
-    // Verificar si el juego debe finalizar
     if (gameConfig.currentRound > gameConfig.rounds) {
         showFinalResults();
     } else {
@@ -426,7 +546,14 @@ function nextRound() {
         updateCurrentPlayer();
         newGame();
     }
-    document.getElementById("guessInput").value = ""; // Limpia el campo de entrada
+
+    // Solo limpiar el campo de entrada si estamos en modo texto
+    if (gameConfig.answerMode === "text") {
+        const guessInput = document.getElementById("guessInput");
+        if (guessInput) {
+            guessInput.value = "";
+        }
+    }
 }
 
 function updateScores() {
@@ -836,17 +963,14 @@ function initializePlaylistSearch() {
 // Llamar a esta función cuando se cargue la página
 document.addEventListener("DOMContentLoaded", initializePlaylistSearch);
 
+// Modificar la función newGame para manejar las opciones múltiples
 async function newGame() {
     resetGameUI();
     updateGameStatus("Cargando nueva canción...");
 
-    // Deshabilitar controles durante la carga
-    document.getElementById("guessInput").disabled = true;
-    document.getElementById("submitGuess").disabled = true;
-
-    const selectionType = document.getElementById("selectionType").value;
-
     try {
+        // Obtener la canción (usando tu código existente)
+        const selectionType = document.getElementById("selectionType").value;
         if (selectionType === "playlist") {
             const playlistInput = document
                 .getElementById("playlistIdInput")
@@ -857,12 +981,8 @@ async function newGame() {
             const artistName = document
                 .getElementById("artistNameInput")
                 .value.trim();
-
-            // Llamar a resetArtistTracks para limpiar canciones de un artista previo
             resetArtistTracks();
-
             const artistTracks = await getTracksByArtist(artistName);
-
             if (!artistTracks || artistTracks.length === 0) {
                 updateGameStatus(
                     "No se encontraron canciones para el artista",
@@ -871,7 +991,6 @@ async function newGame() {
                 return;
             }
 
-            // Filtrar canciones ya usadas
             const availableTracks = artistTracks.filter(
                 (track) => !gameConfig.usedTracks.has(track.id)
             );
@@ -885,30 +1004,104 @@ async function newGame() {
                     Math.floor(Math.random() * availableTracks.length)
                 ];
             gameConfig.usedTracks.add(currentTrack.id);
+
+            // Si es modo de opciones múltiples, generar las opciones
+            if (gameConfig.answerMode === "choice") {
+                gameConfig.options = await generateMultipleChoiceOptions(
+                    currentTrack,
+                    artistTracks
+                );
+                displayMultipleChoiceOptions(gameConfig.options);
+            }
+            
         }
 
-        if (!currentTrack) {
-            return;
-        }
+        if (!currentTrack) return;
 
-        // Esperar a que el reproductor se cargue completamente
         await updatePlayer(currentTrack.id);
 
-        // Una vez cargado el reproductor, habilitar controles e iniciar el timer
-        document.getElementById("guessInput").disabled = false;
-        document.getElementById("submitGuess").disabled = false;
-        document.getElementById("guessInput").focus();
+        if (gameConfig.answerMode === "text") {
+            document.getElementById("guessInput").disabled = false;
+            document.getElementById("submitGuess").disabled = false;
+            document.getElementById("guessInput").focus();
+        } else {
+            enableMultipleChoiceButtons();
+        }
 
         startTimer();
         updateGameStatus("¡Escucha y adivina!");
     } catch (error) {
         console.error("Error en newGame:", error);
         updateGameStatus("Error al cargar la canción", "error");
-        // Asegurar que los controles estén habilitados en caso de error
-        document.getElementById("guessInput").disabled = false;
-        document.getElementById("submitGuess").disabled = false;
     }
 }
+// Function to escape special characters for use in onclick handlers
+function escapeString(str) {
+    return str.replace(/'/g, "\\'").replace(/"/g, '\\"');
+}
+
+// Update the displayMultipleChoiceOptions function
+function displayMultipleChoiceOptions(options) {
+    const optionsGrid = document.querySelector(".options-grid");
+    optionsGrid.innerHTML = options
+        .map((option) => {
+            const escapedOption = escapeString(option);
+            return `
+            <button class="option-button" 
+                    data-option="${escapedOption}" 
+                    onclick="checkMultipleChoiceGuess(this.dataset.option)" 
+                    disabled>
+                ${option}
+            </button>
+        `;
+        })
+        .join("");
+}
+
+// Función para habilitar los botones de opciones
+function enableMultipleChoiceButtons() {
+    const buttons = document.querySelectorAll(".option-button");
+    buttons.forEach((button) => (button.disabled = false));
+}
+
+// Función para verificar respuesta en modo de opciones múltiples
+function checkMultipleChoiceGuess(selectedOption) {
+    const correctAnswer =
+        gameConfig.category === "song"
+            ? currentTrack.name
+            : currentTrack.artists[0].name;
+
+    const isCorrect =
+        selectedOption &&
+        normalizeString(selectedOption) === normalizeString(correctAnswer);
+
+    // Deshabilitar todos los botones de opción
+    const buttons = document.querySelectorAll(".option-button");
+    buttons.forEach((button) => {
+        const buttonOption = button.dataset.option;
+        button.disabled = true;
+
+        if (normalizeString(buttonOption) === normalizeString(correctAnswer)) {
+            button.classList.add("correct-option");
+        } else if (normalizeString(buttonOption) === normalizeString(selectedOption) && !isCorrect) {
+            button.classList.add("incorrect-option");
+        }
+    });
+
+    if (!selectedOption) {
+        // Caso: tiempo agotado y no se seleccionó ninguna opción
+        updateGameStatus("¡Se acabó el tiempo! No seleccionaste ninguna opción.", "error");
+    }
+
+    clearInterval(timerInterval);
+
+    // Finalizar la ronda
+    endRound(isCorrect, selectedOption);
+}
+
+
+
+
 
 function resetArtistTracks() {
     allTracks = []; // Limpiar las canciones almacenadas
@@ -926,10 +1119,16 @@ function startTimer() {
 
         if (timeLeft <= 0) {
             clearInterval(timerInterval);
-            checkGuess(true);
+
+            if (gameConfig.answerMode === "choice") {
+                checkMultipleChoiceGuess(null); // Marcar como incorrecta por falta de selección
+            } else if (gameConfig.answerMode === "text") {
+                checkGuess(true); // Verificar como incorrecta en modo texto
+            }
         }
     }, 1000);
 }
+
 
 function resetGameUI() {
     document.getElementById("answerContainer").style.display = "none";
@@ -941,4 +1140,6 @@ function resetGame() {
     document.getElementById("gameConfig").style.display = "block";
     document.getElementById("gameArea").style.display = "none";
     document.getElementById("finalResults").style.display = "none";
+    gameConfig.players.player1.correctAnswers = 0
+    gameConfig.players.player2.correctAnswers = 0
 }

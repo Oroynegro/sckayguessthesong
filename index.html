@@ -60,6 +60,10 @@
                             <option value="extreme">Todas las canciones</option>
                         </select>
                     </div>
+                    <select id="answerMode" class="form-control">
+                        <option value="text">Escribir respuesta</option>
+                        <option value="choice">Opciones múltiples</option>
+                    </select>
                     <div class="rounds-select">
                         <label for="roundsNumber">Número de rondas:</label>
                         <input
@@ -198,6 +202,7 @@
                             >
                                 Adivinar
                             </button>
+                            <div class="options-grid"></div>
                         </div>
                     </div>
                 </div>
@@ -208,6 +213,8 @@
                     </div>
                     <span>Play</span>
                 </div>
+                
+
 
                 <div class="answer-container" id="answerContainer">
                     <div class="song-info" id="songInfo"></div>
