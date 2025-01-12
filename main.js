@@ -24,57 +24,35 @@ let gameConfig = {
 // Función para generar opciones múltiples
 async function generateMultipleChoiceOptions(correctTrack, allTracks) {
     const options = new Set();
-    const correctOption = gameConfig.category === "song" ? correctTrack.name : correctTrack.artists[0].name;
+    const correctOption =
+        gameConfig.category === "song"
+            ? correctTrack.name
+            : correctTrack.artists[0].name;
     options.add(correctOption);
-    
-    // Crear una copia de todas las pistas para manipular
-    let availableTracks = [...allTracks];
-    
-    // Remover la pista correcta de las disponibles
-    availableTracks = availableTracks.filter(track => track.id !== correctTrack.id);
-    
-    // Si quedan menos de 3 pistas disponibles sin usar, permitir reutilizar pistas
-    const unusedTracks = availableTracks.filter(track => !gameConfig.usedTracks.has(track.id));
-    const tracksToUse = unusedTracks.length < 3 ? availableTracks : unusedTracks;
-    
-    // Intentar obtener 3 opciones adicionales
-    while(options.size < 4 && tracksToUse.length > 0) {
-        const randomIndex = Math.floor(Math.random() * tracksToUse.length);
-        const randomTrack = tracksToUse[randomIndex];
-        const option = gameConfig.category === "song" ? 
-            randomTrack.name : 
-            randomTrack.artists[0].name;
-        
-        // Agregar la opción si no es igual a la correcta
-        if (normalizeString(option) !== normalizeString(correctOption)) {
-            options.add(option);
-        }
-        
-        // Remover la pista usada del array de disponibles
-        tracksToUse.splice(randomIndex, 1);
+
+    // Filtrar tracks únicos por artista o canción
+    let availableOptions = [];
+    if (gameConfig.category === "song") {
+        availableOptions = [...new Set(allTracks.map((track) => track.name))];
+    } else {
+        availableOptions = [
+            ...new Set(allTracks.map((track) => track.artists[0].name)),
+        ];
     }
-    
-    // Si aún no tenemos 4 opciones, rellenar con valores del array original
-    if (options.size < 4) {
-        const remainingTracks = allTracks.filter(track => 
-            track.id !== correctTrack.id && 
-            !Array.from(options).includes(gameConfig.category === "song" ? track.name : track.artists[0].name)
-        );
-        
-        while(options.size < 4 && remainingTracks.length > 0) {
-            const randomIndex = Math.floor(Math.random() * remainingTracks.length);
-            const randomTrack = remainingTracks[randomIndex];
-            const option = gameConfig.category === "song" ? 
-                randomTrack.name : 
-                randomTrack.artists[0].name;
-            
-            if (normalizeString(option) !== normalizeString(correctOption)) {
-                options.add(option);
-            }
-            remainingTracks.splice(randomIndex, 1);
-        }
+
+    // Remover la opción correcta
+    availableOptions = availableOptions.filter(
+        (option) => normalizeString(option) !== normalizeString(correctOption)
+    );
+
+    // Seleccionar opciones aleatorias
+    while (options.size < 4 && availableOptions.length > 0) {
+        const randomIndex = Math.floor(Math.random() * availableOptions.length);
+        const option = availableOptions[randomIndex];
+        options.add(option);
+        availableOptions.splice(randomIndex, 1);
     }
-    
+
     return shuffleArray([...options]);
 }
 // Función para mezclar array
@@ -173,23 +151,46 @@ async function getTracksByArtist(artistName) {
         }
         artistTracksCache[artistName][difficulty] = tracks;
 
-        // Mostrar cuántas canciones y detalles en la consola
-        console.log(
-            `Se obtuvieron ${tracks.length} canciones para el artista ${artistName}, dificultad: ${difficulty}`
-        );
-        tracks.forEach((track, index) => {
-            console.log(
-                `${index + 1}. ${track.name} - ${track.artists
-                    .map((artist) => artist.name)
-                    .join(", ")}`
-            );
-        });
-
         return tracks;
     } catch (error) {
         console.error("Error al obtener las canciones del artista:", error);
         updateGameStatus("Error al obtener las canciones del artista", "error");
         return null;
+    }
+}
+document
+    .querySelector("#gameCategory")
+    .addEventListener("change", ocultarLevel);
+
+function ocultarLevel() {
+    const gameCategory = document.querySelector("#gameCategory");
+    const selectionType = document.querySelector("#selectionType");
+
+    // Cuando se selecciona "artist"
+    if (gameCategory.value === "artist") {
+        const levelSelect = document.querySelector(".level-select");
+        if (levelSelect) {
+            levelSelect.style.display = "none";
+        }
+        const optionToDisable = document.querySelector(
+            "#selectionType option[value='artist']"
+        );
+        if (optionToDisable) {
+            optionToDisable.disabled = true; // Deshabilitar "artist"
+            selectionType.value = "playlist";
+        }
+    } else {
+        // Si no es "artist"
+        const levelSelect = document.querySelector(".level-select");
+        if (levelSelect) {
+            levelSelect.style.display = "block";
+        }
+        const optionToDisable = document.querySelector(
+            "#selectionType option[value='artist']"
+        );
+        if (optionToDisable) {
+            optionToDisable.disabled = false; // Habilitar "playlist"
+        }
     }
 }
 
@@ -210,18 +211,11 @@ document.getElementById("roundsNumber").addEventListener("input", function () {
 
     if (currentValue > max) {
         this.value = max; // Ajustar el valor al máximo permitido si lo excede
-        console.log("Valor ajustado al máximo permitido:", max);
     }
 });
 
 // Función para actualizar el valor máximo basado en modo y dificultad
 function actualizarMaximo() {
-    console.log(
-        "Valor difficultySelect:",
-        document.getElementById("difficultySelect").value
-    );
-    console.log("Valor gameMode:", document.getElementById("gameMode").value);
-
     const roundsInput = document.getElementById("roundsNumber");
 
     if (
@@ -229,17 +223,14 @@ function actualizarMaximo() {
         document.getElementById("difficultySelect").value === "normal"
     ) {
         roundsInput.max = 10;
-        console.log("Max value set to 10");
     } else if (
         document.getElementById("gameMode").value === "multi" &&
         document.getElementById("difficultySelect").value === "normal"
     ) {
         roundsInput.max = 5;
-        console.log("Max value set to 5");
         document.getElementById("player2").style.display = "block";
     } else {
         roundsInput.max = 1000;
-        console.log("Max value set to 1000");
     }
 }
 
@@ -311,7 +302,7 @@ function setupAnswerMode() {
             overlay.style.backgroundColor = "#282828";
             overlay.style.borderRadius = "0";
         }
-        const songInfo = document.querySelector(".song-info")
+        const songInfo = document.querySelector(".song-info");
         if (songInfo) {
             songInfo.style.marginTop = "90px";
         }
@@ -331,14 +322,15 @@ document.getElementById("gameMode").addEventListener("change", function (e) {
 
 async function getAccessToken() {
     try {
-        const response = await fetch('/api/getAccessToken');
+        const response = await fetch("/api/getAccessToken");
         const data = await response.json();
         return data.access_token;
     } catch (error) {
-        console.error('Error al obtener el token:', error);
+        console.error("Error al obtener el token:", error);
         return null;
     }
 }
+
 // Usarla directamente en getRandomTrack:
 async function getRandomTrack() {
     if (!accessToken) {
@@ -394,7 +386,6 @@ function updatePlayer(trackId) {
 
         // Agregar el evento de carga
         iframe.onload = () => {
-            console.log("Spotify player loaded");
             resolve();
         };
 
@@ -443,11 +434,6 @@ function checkGuess(isTimeOut = false) {
         guess === correctAnswer || // Coincidencia exacta
         (guess.length >= minLength && correctAnswer.includes(guess)) || // Guess incluido en la respuesta
         (correctAnswer.length >= minLength && guess.includes(correctAnswer)); // Respuesta incluida en guess
-
-    // Depuración
-    console.log("Guess:", guess);
-    console.log("Correct Answer:", correctAnswer);
-    console.log("Is Correct:", isCorrect);
 
     clearInterval(timerInterval);
     endRound(isCorrect);
@@ -965,7 +951,6 @@ async function newGame() {
     updateGameStatus("Cargando nueva canción...");
 
     try {
-        // Obtener la canción (usando tu código existente)
         const selectionType = document.getElementById("selectionType").value;
         if (selectionType === "playlist") {
             const playlistInput = document
@@ -973,6 +958,18 @@ async function newGame() {
                 .value.trim();
             playlistId = extractPlaylistId(playlistInput) || playlistId;
             currentTrack = await getRandomTrack();
+
+            // Para playlists, necesitamos obtener todas las canciones para generar opciones
+            const playlistResponse = await fetch(
+                `https://api.spotify.com/v1/playlists/${playlistId}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                    },
+                }
+            );
+            const playlist = await playlistResponse.json();
+            allTracks = playlist.tracks.items.map((item) => item.track);
         } else {
             const artistName = document
                 .getElementById("artistNameInput")
@@ -1000,19 +997,19 @@ async function newGame() {
                     Math.floor(Math.random() * availableTracks.length)
                 ];
             gameConfig.usedTracks.add(currentTrack.id);
-
-            // Si es modo de opciones múltiples, generar las opciones
-            if (gameConfig.answerMode === "choice") {
-                gameConfig.options = await generateMultipleChoiceOptions(
-                    currentTrack,
-                    artistTracks
-                );
-                displayMultipleChoiceOptions(gameConfig.options);
-
-            }
+            allTracks = artistTracks; // Guardamos todas las canciones para generar opciones
         }
 
         if (!currentTrack) return;
+
+        // Generar opciones múltiples independientemente del tipo de selección
+        if (gameConfig.answerMode === "choice") {
+            gameConfig.options = await generateMultipleChoiceOptions(
+                currentTrack,
+                allTracks
+            );
+            displayMultipleChoiceOptions(gameConfig.options);
+        }
 
         await updatePlayer(currentTrack.id);
 
@@ -1079,14 +1076,20 @@ function checkMultipleChoiceGuess(selectedOption) {
 
         if (normalizeString(buttonOption) === normalizeString(correctAnswer)) {
             button.classList.add("correct-option");
-        } else if (normalizeString(buttonOption) === normalizeString(selectedOption) && !isCorrect) {
+        } else if (
+            normalizeString(buttonOption) === normalizeString(selectedOption) &&
+            !isCorrect
+        ) {
             button.classList.add("incorrect-option");
         }
     });
 
     if (!selectedOption) {
         // Caso: tiempo agotado y no se seleccionó ninguna opción
-        updateGameStatus("¡Se acabó el tiempo! No seleccionaste ninguna opción.", "error");
+        updateGameStatus(
+            "¡Se acabó el tiempo! No seleccionaste ninguna opción.",
+            "error"
+        );
     }
 
     clearInterval(timerInterval);
@@ -1094,10 +1097,6 @@ function checkMultipleChoiceGuess(selectedOption) {
     // Finalizar la ronda
     endRound(isCorrect, selectedOption);
 }
-
-
-
-
 
 function resetArtistTracks() {
     allTracks = []; // Limpiar las canciones almacenadas
@@ -1125,7 +1124,6 @@ function startTimer() {
     }, 1000);
 }
 
-
 function resetGameUI() {
     document.getElementById("answerContainer").style.display = "none";
     document.getElementById("playInstruction").style.display = "flex";
@@ -1136,6 +1134,6 @@ function resetGame() {
     document.getElementById("gameConfig").style.display = "block";
     document.getElementById("gameArea").style.display = "none";
     document.getElementById("finalResults").style.display = "none";
-    gameConfig.players.player1.correctAnswers = 0
-    gameConfig.players.player2.correctAnswers = 0
+    gameConfig.players.player1.correctAnswers = 0;
+    gameConfig.players.player2.correctAnswers = 0;
 }

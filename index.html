@@ -24,7 +24,7 @@
                 <h2>Configuración del Juego</h2>
                 <div class="config-options">
                     <div class="mode-select">
-                        <label>Modo de Juego:</label>
+                        <label for="gameMode">Modo de Juego:</label>
                         <select id="gameMode">
                             <option value="single">1 Jugador</option>
                             <option value="multi">2 Jugadores</option>
@@ -53,17 +53,32 @@
                             maxlength="8"
                         />
                     </div>
+                    <div class="category-select">
+                        <label for="gameCategory">Categoría:</label>
+                        <select id="gameCategory">
+                            <option value="song" id="guessTheSong">
+                                Adivina la Canción
+                            </option>
+                            <option value="artist" id="guessTheArtist">
+                                Adivina el Artista
+                            </option>
+                        </select>
+                    </div>
                     <div class="level-select">
-                        <label>Nivel</label>
+                        <label for="difficultySelect">Nivel</label>
                         <select id="difficultySelect">
                             <option value="normal">Top 10</option>
                             <option value="extreme">Todas las canciones</option>
                         </select>
                     </div>
-                    <select id="answerMode" class="form-control">
-                        <option value="text">Escribir respuesta</option>
-                        <option value="choice">Opciones múltiples</option>
-                    </select>
+                    <div class="answer-mode-select">
+                        <label for="answerMode">Modo</label>
+                        <select id="answerMode">
+                            <option value="text">Escribir respuesta</option>
+                            <option value="choice">Opciones múltiples</option>
+                        </select>
+                    </div>
+
                     <div class="rounds-select">
                         <label for="roundsNumber">Número de rondas:</label>
                         <input
@@ -75,17 +90,6 @@
                         />
                     </div>
 
-                    <div class="category-select">
-                        <label>Categoría:</label>
-                        <select id="gameCategory">
-                            <option value="song" id="guessTheSong">
-                                Adivina la Canción
-                            </option>
-                            <option value="artist" id="guessTheArtist">
-                                Adivina el Artista
-                            </option>
-                        </select>
-                    </div>
                     <div>
                         <label for="selectionType">Seleccionar por:</label>
                         <select id="selectionType">
@@ -213,8 +217,6 @@
                     </div>
                     <span>Play</span>
                 </div>
-                
-
 
                 <div class="answer-container" id="answerContainer">
                     <div class="song-info" id="songInfo"></div>
