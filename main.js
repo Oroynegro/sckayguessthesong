@@ -31,58 +31,6 @@ document
         }
     });
 
-// Listener para el cambio en el modo de juego
-document
-    .querySelector("#gameMode")
-    .addEventListener("change", actualizarMaximo);
-
-// Listener para el cambio en la dificultad
-document
-    .querySelector("#difficultySelect")
-    .addEventListener("change", actualizarMaximo);
-
-// Listener para validar el valor del input roundsNumber
-document.getElementById("roundsNumber").addEventListener("input", function () {
-    const max = parseInt(this.max, 10); // Obtener el valor máximo permitido
-    const currentValue = parseInt(this.value, 10);
-
-    if (currentValue > max) {
-        this.value = max; // Ajustar el valor al máximo permitido si lo excede
-        console.log("Valor ajustado al máximo permitido:", max);
-    }
-});
-
-// Función para actualizar el valor máximo basado en modo y dificultad
-function actualizarMaximo() {
-    console.log(
-        "Valor difficultySelect:",
-        document.getElementById("difficultySelect").value
-    );
-    console.log("Valor gameMode:", document.getElementById("gameMode").value);
-
-    const roundsInput = document.getElementById("roundsNumber");
-
-    if (
-        document.getElementById("gameMode").value === "single" &&
-        document.getElementById("difficultySelect").value === "normal"
-    ){
-        document.getElementById("player1").style.display = "block"
-        roundsInput.max = 10;
-        console.log("Max value set to 10");
-    } else if (
-        document.getElementById("gameMode").value === "multi" &&
-        document.getElementById("difficultySelect").value === "normal"
-    ) {
-        document.getElementById("player2").style.display = "block";
-        roundsInput.max = 5;
-        console.log("Max value set to 5");
-    } else {
-        document.getElementById("player1").style.display = "block";
-        roundsInput.max = 1000;
-        console.log("Max value set to 1000");
-    }
-}
-
 const artistTracksCache = {}; // Caché para almacenar canciones por artista y dificultad
 
 async function getTracksByArtist(artistName) {
@@ -165,6 +113,47 @@ async function getTracksByArtist(artistName) {
     }
 }
 
+// Listener para el cambio en el modo de juego
+document
+    .querySelector("#gameMode")
+    .addEventListener("change", actualizarMaximo);
+
+// Listener para el cambio en la dificultad
+document
+    .querySelector("#difficultySelect")
+    .addEventListener("change", actualizarMaximo);
+
+// Listener para validar el valor del input roundsNumber
+document.getElementById("roundsNumber").addEventListener("input", function () {
+    const max = parseInt(this.max, 10); // Obtener el valor máximo permitido
+    const currentValue = parseInt(this.value, 10);
+
+    if (currentValue > max) {
+        this.value = max; // Ajustar el valor al máximo permitido si lo excede
+    }
+});
+
+// Función para actualizar el valor máximo basado en modo y dificultad
+function actualizarMaximo() {
+    const roundsInput = document.getElementById("roundsNumber");
+
+    if (
+        document.getElementById("gameMode").value === "single" &&
+        document.getElementById("difficultySelect").value === "normal"
+    ) {
+        roundsInput.max = 10;
+    } else if (
+        document.getElementById("gameMode").value === "multi" &&
+        document.getElementById("difficultySelect").value === "normal"
+    ) {
+        roundsInput.max = 5;
+
+        document.getElementById("player2").style.display = "block";
+    } else {
+        roundsInput.max = 1000;
+    }
+}
+
 // Función para inicializar el juego
 function initializeGame() {
     const guessTheSong = document.getElementById("guessTheArtist");
@@ -229,7 +218,7 @@ function initializeGame() {
 
 // Event listener para el modo de juego
 document.getElementById("gameMode").addEventListener("change", function (e) {
-    document.getElementById("playerNames").style.display =
+    document.getElementById("player2").style.display =
         e.target.value === "multi" ? "block" : "none";
 });
 
@@ -299,7 +288,6 @@ function updatePlayer(trackId) {
 
         // Agregar el evento de carga
         iframe.onload = () => {
-            console.log("Spotify player loaded");
             resolve();
         };
 
@@ -387,6 +375,7 @@ function endRound(isCorrect) {
         if (gameConfig.players[gameConfig.currentPlayer].score > 0) {
             gameConfig.players[gameConfig.currentPlayer].score -= 50;
         }
+
         updateGameStatus(
             `¡Incorrecto! no era: <h2 class="answer-submited">${guessInputShow}</h2> era: <h2 class="answer-submited">${correctAnswer}</h2>`,
             "incorrect"
