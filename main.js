@@ -270,8 +270,8 @@ function actualizarMaximo() {
 
 // Modificar la función initializeGame para incluir el modo de respuesta
 function initializeGame() {
-    const guessTheSong = document.getElementById("guessTheSong");
-    if (guessTheSong.textContent === "Adivina el Artista") {
+    const gameCategory = document.querySelector("#gameCategory");
+    if (gameCategory.value === "artist") {
         document.getElementById("subtitle").textContent = "GUESS THE ARTIST";
     }
 
