@@ -420,141 +420,34 @@ function updatePlayer(trackId) {
     return new Promise((resolve) => {
         const playerContainer = document.getElementById("playerContainer");
         let iframe = document.querySelector("#playerContainer .i-frame");
-        const overlay = document.querySelector(".spotify-overlay");
-
+        
         // Si el iframe no existe, créalo
         if (!iframe) {
             iframe = document.createElement("iframe");
             iframe.width = "100%";
             iframe.height = "100px";
             iframe.frameBorder = "0";
-            iframe.allow =
-                "autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture";
+            iframe.allow = "autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture";
             iframe.loading = "lazy";
             iframe.className = "i-frame";
-
+            
+            // Agregar el evento de carga solo la primera vez
             iframe.onload = () => {
                 console.log("Spotify player loaded");
                 resolve();
             };
-
-            // Función para manejar tanto clicks como toques
-            const handleInteraction = async function (e) {
-                // Prevenir comportamiento por defecto
-                e.preventDefault();
-
-                // Obtener las coordenadas del evento, sea click o touch
-                const rect = overlay.getBoundingClientRect();
-                let x, y;
-
-                if (e.type === "touchstart") {
-                    const touch = e.touches[0];
-                    x = touch.clientX - rect.left;
-                    y = touch.clientY - rect.top;
-                } else {
-                    x = e.clientX - rect.left;
-                    y = e.clientY - rect.top;
-                }
-
-                console.log("Interacción detectada en:", x, y); // Para debugging
-
-                // Si la interacción está en la zona del logo de Spotify
-                // Ajustamos el área para que sea más fácil de tocar en móviles
-                if (y < 50 && x > rect.width - 120) {
-                    console.log("Interacción en zona de Spotify detectada");
-                    const shouldLeave = await showLeaveConfirmation();
-                    if (!shouldLeave) {
-                        return false;
-                    }
-                    // Si el usuario confirma, abrimos Spotify en una nueva pestaña/ventana
-                    window.open(
-                        `https://open.spotify.com/track/${trackId}`,
-                        "_blank"
-                    );
-                }
-                // Para otras interacciones (como el play/pause)
-                else {
-                    overlay.style.display = "none";
-                    const element = document.elementFromPoint(
-                        e.type === "touchstart"
-                            ? e.touches[0].clientX
-                            : e.clientX,
-                        e.type === "touchstart"
-                            ? e.touches[0].clientY
-                            : e.clientY
-                    );
-                    if (element) {
-                        // Simular el click/touch en el elemento subyacente
-                        const clickEvent = new MouseEvent("click", {
-                            bubbles: true,
-                            cancelable: true,
-                            view: window,
-                        });
-                        element.dispatchEvent(clickEvent);
-                    }
-                    // Pequeño delay antes de mostrar el overlay de nuevo
-                    setTimeout(() => {
-                        overlay.style.display = "block";
-                    }, 100);
-                }
-            };
-
-            // Agregar event listeners para click y touch
-            if (overlay) {
-                overlay.addEventListener("click", handleInteraction);
-                overlay.addEventListener("touchstart", handleInteraction, {
-                    passive: false,
-                });
-            }
-
+            
             playerContainer.appendChild(iframe);
         } else {
+            // Si el iframe ya existe, solo actualizamos el src y resolvemos
             iframe.onload = () => {
                 console.log("Spotify player updated");
                 resolve();
             };
         }
-
+        
+        // Actualizar la URL del iframe
         iframe.src = `https://open.spotify.com/embed/track/${trackId}?utm_source=generator`;
-    });
-}
-
-function showLeaveConfirmation() {
-    return new Promise((resolve) => {
-        const modal = document.createElement("div");
-        modal.innerHTML = `
-            <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
-                        background: rgba(0,0,0,0.5); display: flex; 
-                        justify-content: center; align-items: center; z-index: 1001;">
-                <div style="background: white; padding: 20px; border-radius: 8px; 
-                           max-width: 400px; text-align: center;">
-                    <h3 style="margin-top: 0;">¿Quieres abandonar el juego?</h3>
-                    <p>Estás a punto de ir a Spotify.</p>
-                    <div style="display: flex; gap: 10px; justify-content: center;">
-                        <button onclick="this.closest('div').parentElement.remove(); return false" 
-                                style="padding: 8px 16px; background: #e0e0e0; border: none; 
-                                       border-radius: 4px; cursor: pointer;"
-                                id="stay">Quedarme en el juego</button>
-                        <button onclick="this.closest('div').parentElement.remove(); return false"
-                                style="padding: 8px 16px; background: #1DB954; color: white; 
-                                       border: none; border-radius: 4px; cursor: pointer;"
-                                id="leave">Ir a Spotify</button>
-                    </div>
-                </div>
-            </div>
-        `;
-
-        document.body.appendChild(modal);
-
-        modal.querySelector("#stay").onclick = () => {
-            modal.remove();
-            resolve(false);
-        };
-
-        modal.querySelector("#leave").onclick = () => {
-            modal.remove();
-            resolve(true);
-        };
     });
 }
 function normalizeString(str) {

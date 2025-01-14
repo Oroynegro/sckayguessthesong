@@ -21,15 +21,6 @@
     font-size: 2em;
 }
 
-.spotify-overlay {
-    position: absolute;
-    top: 0;
-    left: 90%;
-    right: 0;
-    bottom: 60%;
-    z-index: 1000;
-    cursor: pointer;
-}
 
 @keyframes pop-in {
     0% {
