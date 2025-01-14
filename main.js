@@ -524,8 +524,17 @@ function endRound(isCorrect, selectedOption = "", isPartialMatch = false) {
             basePoints + pointsForTime;
         gameConfig.players[gameConfig.currentPlayer].correctAnswers += 1;
         const message = isPartialMatch
-            ? `¡Correcto (parcialmente)! <h2 class="answer-submited">${guessInputShow}</h2>, Era: <h2 class="answer-submited">${correctAnswer}</h2> 🎉`
-            : "¡Correcto! 🎉";
+            ? `<div class="overlay-points">¡Incompleto!
+            <h2 class="answer-submited">${guessInputShow}</h2>
+            Era: <h2 class="answer-submited">${correctAnswer}</h2>
+            <span class="points-round">+ ${
+                basePoints + pointsForTime
+            }<img src="svg/points.svg" alt="puntos" class="svg-points-round"/></span></div>`
+            : `<div class="overlay-points">¡Correcto!🎉
+            <h2 class="answer-submited">${correctAnswer}</h2>
+            <span class="points-round">+ ${
+                basePoints + pointsForTime
+            }<img src="svg/points.svg" alt="puntos" class="svg-points-round"/></span></div>`;
         updateGameStatus(message, "correct");
     } else {
         const correctAnswer =
@@ -538,8 +547,12 @@ function endRound(isCorrect, selectedOption = "", isPartialMatch = false) {
         }
 
         const incorrectMessage = guessInputShow
-            ? `¡Incorrecto! no era: <h2 class="answer-submited">${guessInputShow}</h2> era: <h2 class="answer-submited">${correctAnswer}</h2>`
-            : `¡Incorrecto! La respuesta correcta era: <h2 class="answer-submited">${correctAnswer}</h2>`;
+            ? `<div class="overlay-points">¡Incorrecto! no era: <h2 class="answer-submited">${guessInputShow}</h2> era: 
+            <h2 class="answer-submited">${correctAnswer}</h2>
+            <span class="points-round">-50<img src="svg/points.svg" alt="puntos" class="svg-points-round"/></span></div>`
+            : `<div class="overlay-points">¡Incorrecto! La respuesta correcta era: 
+            <h2 class="answer-submited">${correctAnswer}</h2>
+            <span class="points-round">-50<img src="svg/points.svg" alt="puntos" class="svg-points-round"/></span></div>`;
 
         updateGameStatus(incorrectMessage, "incorrect");
     }
