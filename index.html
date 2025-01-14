@@ -13,17 +13,17 @@
         />
     </head>
     <body>
-        <div class="container">
+        <div id="gameContainer">
             <div class="game-header">
                 <h1 id="title">SCKAY</h1>
                 <h2 id="subtitle">GUESS THE SONG</h2>
             </div>
-<button id="fullscreen-btn">Pantalla Completa</button>
-<div id="gameContainer"> 
-  <!-- Aquí estará tu juego -->
 
             <!-- Configuración del juego -->
             <div id="gameConfig" class="game-config">
+                <button id="fullscreenBtn" style="display: flex">
+                    <img src="svg/fullscreen.svg" alt="Fullscreen" />
+                </button>
                 <h2>Configuración del Juego</h2>
                 <div class="config-options">
                     <div class="mode-select">
@@ -145,7 +145,7 @@
                                 >${gameConfig.players.player1.score}</span
                             >
                             <span class="emoji"
-                                ><img src="points.svg" alt="puntos"
+                                ><img src="svg/points.svg" alt="puntos"
                             /></span>
                         </div>
                         <div class="player-stats">
@@ -169,7 +169,7 @@
                                 >${gameConfig.players.player2.score}</span
                             >
                             <span class="emoji"
-                                ><img src="points.svg" alt="puntos"
+                                ><img src="svg/points.svg" alt="puntos"
                             /></span>
                         </div>
                         <div class="player-stats">
@@ -212,11 +212,12 @@
                             <div class="options-grid"></div>
                         </div>
                     </div>
+                    <div class="overlay-2"></div>
                 </div>
                 <!-- Nueva flecha con texto -->
                 <div class="play-instruction" id="playInstruction">
                     <div class="arrow">
-                        <img class="arrow" src="arrow.svg" alt="" />
+                        <img class="arrow" src="svg/arrow.svg" alt="" />
                     </div>
                     <span>Play</span>
                 </div>
@@ -233,7 +234,6 @@
                 <button onclick="resetGame()">Jugar de Nuevo</button>
             </div>
         </div>
-    </div>
         <script src="./main.js"></script>
     </body>
 </html>

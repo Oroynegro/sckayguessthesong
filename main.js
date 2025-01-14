@@ -21,19 +21,39 @@ let gameConfig = {
     currentPlayer: "player1",
 };
 
-const fullscreenBtn = document.getElementById('fullscreen-btn');
-const gameContainer = document.getElementById('gameContainer');
+const fullscreenBtn = document.getElementById("fullscreenBtn");
+const gameContainer = document.getElementById("gameContainer");
 
-fullscreenBtn.addEventListener('click', () => {
-  if (gameContainer.requestFullscreen) {
-    gameContainer.requestFullscreen(); // Modo pantalla completa
-  } else if (gameContainer.mozRequestFullScreen) { // Para Firefox
-    gameContainer.mozRequestFullScreen();
-  } else if (gameContainer.webkitRequestFullscreen) { // Para Chrome, Safari y Opera
-    gameContainer.webkitRequestFullscreen();
-  } else if (gameContainer.msRequestFullscreen) { // Para Internet Explorer/Edge
-    gameContainer.msRequestFullscreen();
-  }
+fullscreenBtn.addEventListener("click", () => {
+    if (!document.fullscreenElement) {
+        // Entrar en pantalla completa
+        if (gameContainer.requestFullscreen) {
+            gameContainer.requestFullscreen();
+        } else if (gameContainer.mozRequestFullScreen) {
+            // Firefox
+            gameContainer.mozRequestFullScreen();
+        } else if (gameContainer.webkitRequestFullscreen) {
+            // Chrome, Safari, Opera
+            gameContainer.webkitRequestFullscreen();
+        } else if (gameContainer.msRequestFullscreen) {
+            // Edge/IE
+            gameContainer.msRequestFullscreen();
+        }
+    } else {
+        // Salir de pantalla completa
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        } else if (document.mozCancelFullScreen) {
+            // Firefox
+            document.mozCancelFullScreen();
+        } else if (document.webkitExitFullscreen) {
+            // Chrome, Safari, Opera
+            document.webkitExitFullscreen();
+        } else if (document.msExitFullscreen) {
+            // Edge/IE
+            document.msExitFullscreen();
+        }
+    }
 });
 
 // Función para generar opciones múltiples
@@ -241,7 +261,6 @@ document.getElementById("roundsNumber").addEventListener("input", function () {
 
 // Función para actualizar el valor máximo basado en modo y dificultad
 function actualizarMaximo() {
-
     const roundsInput = document.getElementById("roundsNumber");
 
     if (
@@ -249,7 +268,6 @@ function actualizarMaximo() {
         document.getElementById("difficultySelect").value === "normal"
     ) {
         roundsInput.max = 10;
-
     } else if (
         document.getElementById("gameMode").value === "multi" &&
         document.getElementById("difficultySelect").value === "normal"
@@ -259,7 +277,6 @@ function actualizarMaximo() {
         document.getElementById("player2").style.display = "block";
     } else {
         roundsInput.max = 1000;
-
     }
 }
 
@@ -415,7 +432,6 @@ function updatePlayer(trackId) {
 
         // Agregar el evento de carga
         iframe.onload = () => {
-
             resolve();
         };
 
@@ -474,7 +490,6 @@ function checkGuess(isTimeOut = false) {
 
 let timeLeft = 25; // Tiempo inicial del temporizador
 
-
 function endRound(isCorrect, selectedOption = "", isPartialMatch = false) {
     const guessInputShow =
         gameConfig.answerMode === "text"
@@ -500,17 +515,16 @@ function endRound(isCorrect, selectedOption = "", isPartialMatch = false) {
         pointsForTime = 50;
     }
     const correctAnswer =
-    gameConfig.category === "song"
-        ? currentTrack.name
-        : currentTrack.artists[0].name;
+        gameConfig.category === "song"
+            ? currentTrack.name
+            : currentTrack.artists[0].name;
     if (isCorrect) {
         const basePoints = isPartialMatch ? 150 : 300; // Mitad de puntos si es parcial
         gameConfig.players[gameConfig.currentPlayer].score +=
             basePoints + pointsForTime;
         gameConfig.players[gameConfig.currentPlayer].correctAnswers += 1;
         const message = isPartialMatch
-        
-            ? `¡Correcto (parcialmente)! <h2 class="answer-submited">${guessInputShow}</h2>, Era: <h2 class="answer-submited">${correctAnswer}</h2> 🎉` 
+            ? `¡Correcto (parcialmente)! <h2 class="answer-submited">${guessInputShow}</h2>, Era: <h2 class="answer-submited">${correctAnswer}</h2> 🎉`
             : "¡Correcto! 🎉";
         updateGameStatus(message, "correct");
     } else {
@@ -581,7 +595,7 @@ function nextRound() {
 function updateScores() {
     document.getElementById("player1Score").innerHTML = `
         <div class="player-info">
-            <span class="player-name">${gameConfig.players.player1.name}</span><span class="separator-1">:</span> <span class="score">${gameConfig.players.player1.score}</span><span class="emoji"><img src="points.svg" alt="puntos" class="svg-points"/></span>
+            <span class="player-name">${gameConfig.players.player1.name}</span><span class="separator-1">:</span> <span class="score">${gameConfig.players.player1.score}</span><span class="emoji"><img src="svg/points.svg" alt="puntos" class="svg-points"/></span>
         </div>
         <div class="player-stats">
             <span class="correct-answer">${gameConfig.players.player1.correctAnswers}</span><span class="separator-2">/</span><span class="total-rounds">${gameConfig.rounds}</span>
@@ -591,7 +605,7 @@ function updateScores() {
     if (gameConfig.mode === "multi") {
         document.getElementById("player2Score").innerHTML = `
         <div class="player-info">
-            <span class="player-name">${gameConfig.players.player2.name}</span><span class="separator-1">: </span><span class="score">${gameConfig.players.player2.score}</span><span class="emoji"><img src="points.svg" alt="puntos" class="svg-points"/></span>
+            <span class="player-name">${gameConfig.players.player2.name}</span><span class="separator-1">: </span><span class="score">${gameConfig.players.player2.score}</span><span class="emoji"><img src="svg/points.svg" alt="puntos" class="svg-points"/></span>
         </div>
         <div class="player-stats">
             <span class="correct-answer">${gameConfig.players.player2.correctAnswers}</span><span class="separator-2">/</span><span class="total-rounds">${gameConfig.rounds}</span>
@@ -649,7 +663,7 @@ function showFinalResults() {
             <span class="player-name-final">${gameConfig.players.player1.name}</span>
             <span class="separator-1-final">:</span>
             <span class="score-final">${gameConfig.players.player1.score}</span>
-            <span class="emoji-final"><img src="points.svg" alt="puntos" class="svg-points-final"/></span>
+            <span class="emoji-final"><img src="svg/points.svg" alt="puntos" class="svg-points-final"/></span>
         </div>
         <div class="player-stats-final">
             <span class="correct-answer-final">${gameConfig.players.player1.correctAnswers}</span>
@@ -664,7 +678,7 @@ function showFinalResults() {
                 <span class="player-name-final">${gameConfig.players.player2.name}</span>
                 <span class="separator-1-final">:</span>
                 <span class="score-final">${gameConfig.players.player2.score}</span>
-                <span class="emoji-final"><img src="points.svg" alt="puntos" class="svg-points-final"/></span>
+                <span class="emoji-final"><img src="svg/points.svg" alt="puntos" class="svg-points-final"/></span>
             </div>
             <div class="player-stats-final">
                 <span class="correct-answer-final">${gameConfig.players.player2.correctAnswers}</span>
