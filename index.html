@@ -18,6 +18,9 @@
                 <h1 id="title">SCKAY</h1>
                 <h2 id="subtitle">GUESS THE SONG</h2>
             </div>
+<button id="fullscreen-btn">Pantalla Completa</button>
+<div id="gameContainer"> 
+  <!-- Aquí estará tu juego -->
 
             <!-- Configuración del juego -->
             <div id="gameConfig" class="game-config">
@@ -65,14 +68,14 @@
                         </select>
                     </div>
                     <div class="level-select">
-                        <label for="difficultySelect">Nivel:</label>
+                        <label for="difficultySelect">Nivel</label>
                         <select id="difficultySelect">
                             <option value="normal">Top 10</option>
                             <option value="extreme">Todas las canciones</option>
                         </select>
                     </div>
                     <div class="answer-mode-select">
-                        <label for="answerMode">Modo:</label>
+                        <label for="answerMode">Modo</label>
                         <select id="answerMode">
                             <option value="text">Escribir respuesta</option>
                             <option value="choice">Opciones múltiples</option>
@@ -230,6 +233,7 @@
                 <button onclick="resetGame()">Jugar de Nuevo</button>
             </div>
         </div>
+    </div>
         <script src="./main.js"></script>
     </body>
 </html>

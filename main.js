@@ -21,6 +21,21 @@ let gameConfig = {
     currentPlayer: "player1",
 };
 
+const fullscreenBtn = document.getElementById('fullscreen-btn');
+const gameContainer = document.getElementById('gameContainer');
+
+fullscreenBtn.addEventListener('click', () => {
+  if (gameContainer.requestFullscreen) {
+    gameContainer.requestFullscreen(); // Modo pantalla completa
+  } else if (gameContainer.mozRequestFullScreen) { // Para Firefox
+    gameContainer.mozRequestFullScreen();
+  } else if (gameContainer.webkitRequestFullscreen) { // Para Chrome, Safari y Opera
+    gameContainer.webkitRequestFullscreen();
+  } else if (gameContainer.msRequestFullscreen) { // Para Internet Explorer/Edge
+    gameContainer.msRequestFullscreen();
+  }
+});
+
 // Función para generar opciones múltiples
 async function generateMultipleChoiceOptions(correctTrack, allTracks) {
     const options = new Set();
@@ -422,43 +437,45 @@ function checkGuess(isTimeOut = false) {
     );
     let correctAnswer = "";
     let isCorrect = false;
+    let isPartialMatch = false; // Nuevo indicador para coincidencia parcial
 
-    // Si es timeout y no hay respuesta, terminamos la ronda directamente
     if (isTimeOut && !guess) {
         clearInterval(timerInterval);
         endRound(false);
         return;
     }
 
-    // Validar que el usuario ingresó una respuesta (solo si no es timeout)
     if (!isTimeOut && !guess) {
         updateGameStatus("Escribe una respuesta antes de enviar.", "error");
         return;
     }
 
-    // Determinar la respuesta correcta según la categoría
     if (gameConfig.category === "song") {
         correctAnswer = normalizeString(currentTrack.name);
     } else {
         correctAnswer = normalizeString(currentTrack.artists[0].name);
     }
 
-    // Comparar con reglas de coincidencia parcial
-    const minLength = 3; // Longitud mínima para coincidencias parciales
-    isCorrect =
-        guess === correctAnswer || // Coincidencia exacta
-        (guess.length >= minLength && correctAnswer.includes(guess)) || // Guess incluido en la respuesta
-        (correctAnswer.length >= minLength && guess.includes(correctAnswer)); // Respuesta incluida en guess
-
+    const minLength = 3;
+    if (guess === correctAnswer) {
+        isCorrect = true;
+    } else if (
+        (guess.length >= minLength && correctAnswer.includes(guess)) ||
+        (correctAnswer.length >= minLength && guess.includes(correctAnswer))
+    ) {
+        isCorrect = true;
+        isPartialMatch = true; // Coincidencia parcial detectada
+    }
 
     clearInterval(timerInterval);
-    endRound(isCorrect);
+    endRound(isCorrect, "", isPartialMatch); // Pasar indicador de coincidencia parcial
     guessInput.value = "";
 }
 
 let timeLeft = 25; // Tiempo inicial del temporizador
 
-function endRound(isCorrect, selectedOption = "") {
+
+function endRound(isCorrect, selectedOption = "", isPartialMatch = false) {
     const guessInputShow =
         gameConfig.answerMode === "text"
             ? (document.getElementById("guessInput")?.value || "").trim()
@@ -482,12 +499,20 @@ function endRound(isCorrect, selectedOption = "") {
     } else if (timeLeft > 0) {
         pointsForTime = 50;
     }
-
+    const correctAnswer =
+    gameConfig.category === "song"
+        ? currentTrack.name
+        : currentTrack.artists[0].name;
     if (isCorrect) {
+        const basePoints = isPartialMatch ? 150 : 300; // Mitad de puntos si es parcial
         gameConfig.players[gameConfig.currentPlayer].score +=
-            300 + pointsForTime;
+            basePoints + pointsForTime;
         gameConfig.players[gameConfig.currentPlayer].correctAnswers += 1;
-        updateGameStatus("¡Correcto! 🎉", "correct");
+        const message = isPartialMatch
+        
+            ? `¡Correcto (parcialmente)! <h2 class="answer-submited">${guessInputShow}</h2>, Era: <h2 class="answer-submited">${correctAnswer}</h2> 🎉` 
+            : "¡Correcto! 🎉";
+        updateGameStatus(message, "correct");
     } else {
         const correctAnswer =
             gameConfig.category === "song"
@@ -498,7 +523,6 @@ function endRound(isCorrect, selectedOption = "") {
             gameConfig.players[gameConfig.currentPlayer].score -= 50;
         }
 
-        // Only show the incorrect guess if there was one
         const incorrectMessage = guessInputShow
             ? `¡Incorrecto! no era: <h2 class="answer-submited">${guessInputShow}</h2> era: <h2 class="answer-submited">${correctAnswer}</h2>`
             : `¡Incorrecto! La respuesta correcta era: <h2 class="answer-submited">${correctAnswer}</h2>`;
