@@ -500,7 +500,7 @@ function checkGuess(isTimeOut = false) {
 
 let timeLeft = 25; // Tiempo inicial del temporizador
 
-function endRound(isCorrect, selectedOption = "", isPartialMatch = false) {
+function endRound(isCorrect, selectedOption = "") {
     const guessInputShow =
         gameConfig.answerMode === "text"
             ? (document.getElementById("guessInput")?.value || "").trim()
@@ -524,28 +524,22 @@ function endRound(isCorrect, selectedOption = "", isPartialMatch = false) {
     } else if (timeLeft > 0) {
         pointsForTime = 50;
     }
-    const correctAnswer =
-        gameConfig.category === "song"
-            ? currentTrack.name
-            : currentTrack.artists[0].name;
+
     if (isCorrect) {
-        const basePoints = isPartialMatch ? 150 : 300; // Mitad de puntos si es parcial
+        const correctAnswer =
+            gameConfig.category === "song"
+                ? currentTrack.name
+                : currentTrack.artists[0].name;
         gameConfig.players[gameConfig.currentPlayer].score +=
-            basePoints + pointsForTime;
+            300 + pointsForTime;
         gameConfig.players[gameConfig.currentPlayer].correctAnswers += 1;
-        const message = isPartialMatch
-            ? `<div class="overlay-points">¡Incompleto!
-            <h2 class="answer-submited">${guessInputShow}</h2>
-            Era: <h2 class="answer-submited">${correctAnswer}</h2>
-            <span class="points-round">+ ${
-                basePoints + pointsForTime
-            }<img src="svg/points.svg" alt="puntos" class="svg-points-round"/></span></div>`
-            : `<div class="overlay-points">¡Correcto!🎉
+        updateGameStatus(
+            `<div class="overlay-points">¡Correcto!🎉
             <h2 class="answer-submited">${correctAnswer}</h2>
-            <span class="points-round">+ ${
-                basePoints + pointsForTime
-            }<img src="svg/points.svg" alt="puntos" class="svg-points-round"/></span></div>`;
-        updateGameStatus(message, "correct");
+            <span class="points-round">+300<img src="svg/points.svg" alt="puntos" class="svg-points-round"/></span>
+            <span class="points-round">+ ${pointsForTime}<img src="svg/points.svg" alt="puntos" class="svg-points-round"/></span>
+            </div>`
+        ,"correct")
     } else {
         const correctAnswer =
             gameConfig.category === "song"
@@ -1184,20 +1178,22 @@ function startTimer() {
     timeLeft = 25;
     timer.textContent = timeLeft;
 
-    timerInterval = setInterval(() => {
-        timeLeft--;
-        timer.textContent = timeLeft;
-
-        if (timeLeft <= 0) {
-            clearInterval(timerInterval);
-
-            if (gameConfig.answerMode === "choice") {
-                checkMultipleChoiceGuess(null); // Marcar como incorrecta por falta de selección
-            } else if (gameConfig.answerMode === "text") {
-                checkGuess(true); // Verificar como incorrecta en modo texto
+    setTimeout(() => {
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            timer.textContent = timeLeft;
+    
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+    
+                if (gameConfig.answerMode === "choice") {
+                    checkMultipleChoiceGuess(null); // Marcar como incorrecta por falta de selección
+                } else if (gameConfig.answerMode === "text") {
+                    checkGuess(true); // Verificar como incorrecta en modo texto
+                }
             }
-        }
-    }, 1000);
+        }, 1000);
+    },2000);
 }
 
 function resetGameUI() {
