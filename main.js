@@ -419,25 +419,35 @@ async function getRandomTrack() {
 function updatePlayer(trackId) {
     return new Promise((resolve) => {
         const playerContainer = document.getElementById("playerContainer");
-
-        // Crear el iframe
-        const iframe = document.createElement("iframe");
+        let iframe = document.querySelector("#playerContainer .i-frame");
+        
+        // Si el iframe no existe, créalo
+        if (!iframe) {
+            iframe = document.createElement("iframe");
+            iframe.width = "100%";
+            iframe.height = "100px";
+            iframe.frameBorder = "0";
+            iframe.allow = "autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture";
+            iframe.loading = "lazy";
+            iframe.className = "i-frame";
+            
+            // Agregar el evento de carga solo la primera vez
+            iframe.onload = () => {
+                console.log("Spotify player loaded");
+                resolve();
+            };
+            
+            playerContainer.appendChild(iframe);
+        } else {
+            // Si el iframe ya existe, solo actualizamos el src y resolvemos
+            iframe.onload = () => {
+                console.log("Spotify player updated");
+                resolve();
+            };
+        }
+        
+        // Actualizar la URL del iframe
         iframe.src = `https://open.spotify.com/embed/track/${trackId}?utm_source=generator`;
-        iframe.width = "100%";
-        iframe.height = "100px";
-        iframe.frameBorder = "0";
-        iframe.allow =
-            "autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture";
-        iframe.loading = "lazy";
-
-        // Agregar el evento de carga
-        iframe.onload = () => {
-            resolve();
-        };
-
-        // Limpiar y agregar el nuevo iframe
-        playerContainer.innerHTML = "";
-        playerContainer.appendChild(iframe);
     });
 }
 function normalizeString(str) {
