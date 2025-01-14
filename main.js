@@ -151,18 +151,6 @@ async function getTracksByArtist(artistName) {
         }
         artistTracksCache[artistName][difficulty] = tracks;
 
-        // Mostrar cuántas canciones y detalles en la consola
-        console.log(
-            `Se obtuvieron ${tracks.length} canciones para el artista ${artistName}, dificultad: ${difficulty}`
-        );
-        tracks.forEach((track, index) => {
-            console.log(
-                `${index + 1}. ${track.name} - ${track.artists
-                    .map((artist) => artist.name)
-                    .join(", ")}`
-            );
-        });
-
         return tracks;
     } catch (error) {
         console.error("Error al obtener las canciones del artista:", error);
@@ -182,7 +170,6 @@ function ocultarLevel() {
         const levelSelect = document.querySelector(".level-select");
         if (levelSelect) {
             levelSelect.style.display = "none";
-            console.log("artist");
         }
         const optionToDisable = document.querySelector(
             "#selectionType option[value='artist']"
@@ -207,7 +194,6 @@ function ocultarLevel() {
         const levelSelect = document.querySelector(".level-select");
         if (levelSelect) {
             levelSelect.style.display = "flex";
-            console.log("song");
         }
         const optionToDisable = document.querySelector(
             "#selectionType option[value='artist']"
@@ -235,17 +221,11 @@ document.getElementById("roundsNumber").addEventListener("input", function () {
 
     if (currentValue > max) {
         this.value = max; // Ajustar el valor al máximo permitido si lo excede
-        console.log("Valor ajustado al máximo permitido:", max);
     }
 });
 
 // Función para actualizar el valor máximo basado en modo y dificultad
 function actualizarMaximo() {
-    console.log(
-        "Valor difficultySelect:",
-        document.getElementById("difficultySelect").value
-    );
-    console.log("Valor gameMode:", document.getElementById("gameMode").value);
 
     const roundsInput = document.getElementById("roundsNumber");
 
@@ -254,17 +234,17 @@ function actualizarMaximo() {
         document.getElementById("difficultySelect").value === "normal"
     ) {
         roundsInput.max = 10;
-        console.log("Max value set to 10");
+
     } else if (
         document.getElementById("gameMode").value === "multi" &&
         document.getElementById("difficultySelect").value === "normal"
     ) {
         roundsInput.max = 5;
-        console.log("Max value set to 5");
+
         document.getElementById("player2").style.display = "block";
     } else {
         roundsInput.max = 1000;
-        console.log("Max value set to 1000");
+
     }
 }
 
@@ -420,7 +400,7 @@ function updatePlayer(trackId) {
 
         // Agregar el evento de carga
         iframe.onload = () => {
-            console.log("Spotify player loaded");
+
             resolve();
         };
 
@@ -470,10 +450,6 @@ function checkGuess(isTimeOut = false) {
         (guess.length >= minLength && correctAnswer.includes(guess)) || // Guess incluido en la respuesta
         (correctAnswer.length >= minLength && guess.includes(correctAnswer)); // Respuesta incluida en guess
 
-    // Depuración
-    console.log("Guess:", guess);
-    console.log("Correct Answer:", correctAnswer);
-    console.log("Is Correct:", isCorrect);
 
     clearInterval(timerInterval);
     endRound(isCorrect);
