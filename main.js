@@ -434,47 +434,83 @@ function updatePlayer(trackId) {
             iframe.className = "i-frame";
 
             iframe.onload = () => {
+                console.log("Spotify player loaded");
                 resolve();
             };
 
-            // Configurar el event listener del overlay existente
-            if (overlay) {
-                overlay.addEventListener("click", async function (e) {
-                    // Obtener la posición del click relativa al overlay
-                    const rect = overlay.getBoundingClientRect();
-                    const x = e.clientX - rect.left;
-                    const y = e.clientY - rect.top;
+            // Función para manejar tanto clicks como toques
+            const handleInteraction = async function (e) {
+                // Prevenir comportamiento por defecto
+                e.preventDefault();
 
-                    // Si el click está en la zona del logo de Spotify
-                    if (y < 40 && x > rect.width - 100) {
-                        const shouldLeave = await showLeaveConfirmation();
-                        if (!shouldLeave) {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            return false;
-                        }
-                        // Si el usuario confirma, abrimos Spotify en una nueva pestaña
-                        window.open(
-                            `https://open.spotify.com/track/${trackId}`,
-                            "_blank"
-                        );
+                // Obtener las coordenadas del evento, sea click o touch
+                const rect = overlay.getBoundingClientRect();
+                let x, y;
+
+                if (e.type === "touchstart") {
+                    const touch = e.touches[0];
+                    x = touch.clientX - rect.left;
+                    y = touch.clientY - rect.top;
+                } else {
+                    x = e.clientX - rect.left;
+                    y = e.clientY - rect.top;
+                }
+
+                console.log("Interacción detectada en:", x, y); // Para debugging
+
+                // Si la interacción está en la zona del logo de Spotify
+                // Ajustamos el área para que sea más fácil de tocar en móviles
+                if (y < 50 && x > rect.width - 120) {
+                    console.log("Interacción en zona de Spotify detectada");
+                    const shouldLeave = await showLeaveConfirmation();
+                    if (!shouldLeave) {
+                        return false;
                     }
-                    // Para otros clicks (como el play/pause), los pasamos al iframe
-                    else {
-                        overlay.style.display = "none";
-                        const element = document.elementFromPoint(
-                            e.clientX,
-                            e.clientY
-                        );
-                        element.click();
+                    // Si el usuario confirma, abrimos Spotify en una nueva pestaña/ventana
+                    window.open(
+                        `https://open.spotify.com/track/${trackId}`,
+                        "_blank"
+                    );
+                }
+                // Para otras interacciones (como el play/pause)
+                else {
+                    overlay.style.display = "none";
+                    const element = document.elementFromPoint(
+                        e.type === "touchstart"
+                            ? e.touches[0].clientX
+                            : e.clientX,
+                        e.type === "touchstart"
+                            ? e.touches[0].clientY
+                            : e.clientY
+                    );
+                    if (element) {
+                        // Simular el click/touch en el elemento subyacente
+                        const clickEvent = new MouseEvent("click", {
+                            bubbles: true,
+                            cancelable: true,
+                            view: window,
+                        });
+                        element.dispatchEvent(clickEvent);
+                    }
+                    // Pequeño delay antes de mostrar el overlay de nuevo
+                    setTimeout(() => {
                         overlay.style.display = "block";
-                    }
+                    }, 100);
+                }
+            };
+
+            // Agregar event listeners para click y touch
+            if (overlay) {
+                overlay.addEventListener("click", handleInteraction);
+                overlay.addEventListener("touchstart", handleInteraction, {
+                    passive: false,
                 });
             }
 
             playerContainer.appendChild(iframe);
         } else {
             iframe.onload = () => {
+                console.log("Spotify player updated");
                 resolve();
             };
         }
