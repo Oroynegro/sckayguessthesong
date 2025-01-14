@@ -1070,7 +1070,6 @@ async function newGame() {
         if (gameConfig.answerMode === "text") {
             document.getElementById("guessInput").disabled = false;
             document.getElementById("submitGuess").disabled = false;
-            document.getElementById("guessInput").focus();
         } else {
             enableMultipleChoiceButtons();
         }
