@@ -286,6 +286,7 @@ body {
 .points-round {
     display: inline-block;
     font-size: 3em;
+    color:#1db954;
 }
 .svg-points {
     width: 21px;
