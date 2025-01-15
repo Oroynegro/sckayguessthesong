@@ -390,11 +390,11 @@ document.getElementById("gameMode").addEventListener("change", function (e) {
 
 async function getAccessToken() {
     try {
-        const response = await fetch('/api/getAccessToken');
+        const response = await fetch("/api/getAccessToken");
         const data = await response.json();
         return data.access_token;
     } catch (error) {
-        console.error('Error al obtener el token:', error);
+        console.error("Error al obtener el token:", error);
         return null;
     }
 }
@@ -442,23 +442,24 @@ function updatePlayer(trackId) {
     return new Promise((resolve) => {
         const playerContainer = document.getElementById("playerContainer");
         let iframe = document.querySelector("#playerContainer .i-frame");
-        
+
         // Si el iframe no existe, créalo
         if (!iframe) {
             iframe = document.createElement("iframe");
             iframe.width = "100%";
             iframe.height = "100px";
             iframe.frameBorder = "0";
-            iframe.allow = "autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture";
+            iframe.allow =
+                "autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture";
             iframe.loading = "lazy";
             iframe.className = "i-frame";
-            
+
             // Agregar el evento de carga solo la primera vez
             iframe.onload = () => {
                 console.log("Spotify player loaded");
                 resolve();
             };
-            
+
             playerContainer.appendChild(iframe);
         } else {
             // Si el iframe ya existe, solo actualizamos el src y resolvemos
@@ -467,7 +468,7 @@ function updatePlayer(trackId) {
                 resolve();
             };
         }
-        
+
         // Actualizar la URL del iframe
         iframe.src = `https://open.spotify.com/embed/track/${trackId}?utm_source=generator`;
     });
@@ -562,9 +563,10 @@ function endRound(isCorrect, selectedOption = "") {
         gameConfig.players[gameConfig.currentPlayer].correctAnswers += 1;
         updateGameStatus(
             `<div class="overlay-points">¡Correcto!🎉
-            <h2 class="answer-submited">${correctAnswer+pointsForTime}</h2>
-            <span class="points-round">+300<img src="svg/points.svg" alt="puntos" class="svg-points-round"/></span>`
-        ,"correct")
+            <h2 class="answer-submited">${correctAnswer + pointsForTime}</h2>
+            <span class="points-round">+300<img src="svg/points.svg" alt="puntos" class="svg-points-round"/></span>`,
+            "correct"
+        );
     } else {
         const correctAnswer =
             gameConfig.category === "song"
@@ -681,7 +683,7 @@ function updateCurrentPlayer() {
 async function takeScreenshot() {
     try {
         const finalResults = document.getElementById("finalResults");
-        
+
         // Crear un contenedor temporal para la captura
         const tempContainer = document.createElement("div");
         tempContainer.style.position = "absolute";
@@ -692,7 +694,7 @@ async function takeScreenshot() {
 
         // Ajustar el ancho del contenedor temporal
         tempContainer.style.width = finalResults.offsetWidth + "px";
-        
+
         // Tomar la captura con html2canvas
         const canvas = await html2canvas(tempContainer, {
             backgroundColor: "#282828",
@@ -700,34 +702,36 @@ async function takeScreenshot() {
             useCORS: true, // Permitir imágenes de otros dominios
             logging: false,
         });
-        
+
         // Eliminar el contenedor temporal
         document.body.removeChild(tempContainer);
 
         // Convertir el canvas a blob
-        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
-        
+        const blob = await new Promise((resolve) =>
+            canvas.toBlob(resolve, "image/png")
+        );
+
         // Intentar usar Web Share API primero (mejor para móviles)
         if (navigator.share) {
-            const file = new File([blob], 'score.png', { type: 'image/png' });
+            const file = new File([blob], "score.png", { type: "image/png" });
             await navigator.share({
                 files: [file],
-                title: 'Mi puntuación en Spotify Game',
+                title: "Mi puntuación en Spotify Game",
             });
         } else {
             // Fallback para navegadores que no soportan Web Share API
             const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
+            const a = document.createElement("a");
             a.href = url;
-            a.download = 'score.png';
+            a.download = "score.png";
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
         }
     } catch (error) {
-        console.error('Error al tomar la captura:', error);
-        alert('No se pudo compartir la captura. Intenta de nuevo.');
+        console.error("Error al tomar la captura:", error);
+        alert("No se pudo compartir la captura. Intenta de nuevo.");
     }
 }
 
@@ -738,27 +742,32 @@ async function showFinalResults() {
     finalResults.style.display = "block";
 
     let resultsHTML = "";
-    
+
     // Obtener información del artista o playlist
     const selectionType = document.getElementById("selectionType").value;
     let contentInfo = "";
-    
+
     try {
         if (selectionType === "artist") {
-            const artistName = document.getElementById("artistNameInput").value.trim();
+            const artistName = document
+                .getElementById("artistNameInput")
+                .value.trim();
             const artists = await searchArtists(artistName);
             if (artists && artists.length > 0) {
                 const artist = artists[0];
-                const imageUrl = artist.images && artist.images.length > 0 
-                    ? artist.images[0].url 
-                    : "https://placehold.co/200x200?text=No+Image";
-                const followers = artist.followers?.total 
-                    ? new Intl.NumberFormat().format(artist.followers.total) 
+                const imageUrl =
+                    artist.images && artist.images.length > 0
+                        ? artist.images[0].url
+                        : "https://placehold.co/200x200?text=No+Image";
+                const followers = artist.followers?.total
+                    ? new Intl.NumberFormat().format(artist.followers.total)
                     : "0";
-                
+
                 contentInfo = `
                     <div class="content-info">
-                        <img src="${imageUrl}" alt="${artist.name}" class="content-thumbnail" crossorigin="anonymous">
+                        <img src="${imageUrl}" alt="${
+                    artist.name
+                }" class="content-thumbnail" crossorigin="anonymous">
                         <div class="content-details">
                             <h3>${artist.name}</h3>
                             <p>${followers} seguidores</p>
@@ -771,22 +780,28 @@ async function showFinalResults() {
             const response = await fetch(
                 `https://api.spotify.com/v1/playlists/${playlistId}`,
                 {
-                    headers: { Authorization: `Bearer ${accessToken}` }
+                    headers: { Authorization: `Bearer ${accessToken}` },
                 }
             );
             const playlist = await response.json();
-            
+
             if (playlist) {
-                const imageUrl = playlist.images && playlist.images.length > 0 
-                    ? playlist.images[0].url 
-                    : "https://placehold.co/200x200?text=No+Image";
-                
+                const imageUrl =
+                    playlist.images && playlist.images.length > 0
+                        ? playlist.images[0].url
+                        : "https://placehold.co/200x200?text=No+Image";
+
                 contentInfo = `
                     <div class="content-info">
-                        <img src="${imageUrl}" alt="${playlist.name}" class="content-thumbnail" crossorigin="anonymous">
+                        <img src="${imageUrl}" alt="${
+                    playlist.name
+                }" class="content-thumbnail" crossorigin="anonymous">
                         <div class="content-details">
                             <h3>${playlist.name}</h3>
-                            <p>Por: ${playlist.owner?.display_name || 'Usuario desconocido'}</p>
+                            <p>Por: ${
+                                playlist.owner?.display_name ||
+                                "Usuario desconocido"
+                            }</p>
                             <p>${playlist.tracks?.total || 0} canciones</p>
                         </div>
                     </div>
@@ -806,7 +821,8 @@ async function showFinalResults() {
         const winner =
             gameConfig.players.player1.score > gameConfig.players.player2.score
                 ? gameConfig.players.player1.name
-                : gameConfig.players.player1.score < gameConfig.players.player2.score
+                : gameConfig.players.player1.score <
+                  gameConfig.players.player2.score
                 ? gameConfig.players.player2.name
                 : "Empate";
 
@@ -864,8 +880,10 @@ async function showFinalResults() {
     document.getElementById("playAgainButton").addEventListener("click", () => {
         resetGame();
     });
-    
-    document.getElementById("shareButton").addEventListener("click", takeScreenshot);
+
+    document
+        .getElementById("shareButton")
+        .addEventListener("click", takeScreenshot);
 }
 
 function updateGameStatus(message, status) {
@@ -1332,10 +1350,10 @@ function startTimer() {
         timerInterval = setInterval(() => {
             timeLeft--;
             timer.textContent = timeLeft;
-    
+
             if (timeLeft <= 0) {
                 clearInterval(timerInterval);
-    
+
                 if (gameConfig.answerMode === "choice") {
                     checkMultipleChoiceGuess(null); // Marcar como incorrecta por falta de selección
                 } else if (gameConfig.answerMode === "text") {
@@ -1343,7 +1361,7 @@ function startTimer() {
                 }
             }
         }, 1000);
-    },1500);
+    }, 1500);
 }
 
 function resetGameUI() {
