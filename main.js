@@ -20,7 +20,6 @@ let gameConfig = {
     },
     currentPlayer: "player1",
 };
-
 const fullscreenBtn = document.getElementById("fullscreenBtn");
 const gameContainer = document.getElementById("gameContainer");
 
@@ -186,6 +185,18 @@ async function getTracksByArtist(artistName) {
         }
         artistTracksCache[artistName][difficulty] = tracks;
 
+        // Mostrar cuántas canciones y detalles en la consola
+        console.log(
+            `Se obtuvieron ${tracks.length} canciones para el artista ${artistName}, dificultad: ${difficulty}`
+        );
+        tracks.forEach((track, index) => {
+            console.log(
+                `${index + 1}. ${track.name} - ${track.artists
+                    .map((artist) => artist.name)
+                    .join(", ")}`
+            );
+        });
+
         return tracks;
     } catch (error) {
         console.error("Error al obtener las canciones del artista:", error);
@@ -205,6 +216,7 @@ function ocultarLevel() {
         const levelSelect = document.querySelector(".level-select");
         if (levelSelect) {
             levelSelect.style.display = "none";
+            console.log("artist");
         }
         const optionToDisable = document.querySelector(
             "#selectionType option[value='artist']"
@@ -229,6 +241,7 @@ function ocultarLevel() {
         const levelSelect = document.querySelector(".level-select");
         if (levelSelect) {
             levelSelect.style.display = "flex";
+            console.log("song");
         }
         const optionToDisable = document.querySelector(
             "#selectionType option[value='artist']"
@@ -256,11 +269,18 @@ document.getElementById("roundsNumber").addEventListener("input", function () {
 
     if (currentValue > max) {
         this.value = max; // Ajustar el valor al máximo permitido si lo excede
+        console.log("Valor ajustado al máximo permitido:", max);
     }
 });
 
 // Función para actualizar el valor máximo basado en modo y dificultad
 function actualizarMaximo() {
+    console.log(
+        "Valor difficultySelect:",
+        document.getElementById("difficultySelect").value
+    );
+    console.log("Valor gameMode:", document.getElementById("gameMode").value);
+
     const roundsInput = document.getElementById("roundsNumber");
 
     if (
@@ -268,15 +288,17 @@ function actualizarMaximo() {
         document.getElementById("difficultySelect").value === "normal"
     ) {
         roundsInput.max = 10;
+        console.log("Max value set to 10");
     } else if (
         document.getElementById("gameMode").value === "multi" &&
         document.getElementById("difficultySelect").value === "normal"
     ) {
         roundsInput.max = 5;
-
+        console.log("Max value set to 5");
         document.getElementById("player2").style.display = "block";
     } else {
         roundsInput.max = 1000;
+        console.log("Max value set to 1000");
     }
 }
 
@@ -368,11 +390,11 @@ document.getElementById("gameMode").addEventListener("change", function (e) {
 
 async function getAccessToken() {
     try {
-        const response = await fetch("/api/getAccessToken");
+        const response = await fetch('/api/getAccessToken');
         const data = await response.json();
         return data.access_token;
     } catch (error) {
-        console.error("Error al obtener el token:", error);
+        console.error('Error al obtener el token:', error);
         return null;
     }
 }
@@ -493,6 +515,11 @@ function checkGuess(isTimeOut = false) {
         isPartialMatch = true; // Coincidencia parcial detectada
     }
 
+    console.log("Guess:", guess);
+    console.log("Correct Answer:", correctAnswer);
+    console.log("Is Correct:", isCorrect);
+    console.log("Is Partial Match:", isPartialMatch);
+
     clearInterval(timerInterval);
     endRound(isCorrect, "", isPartialMatch); // Pasar indicador de coincidencia parcial
     guessInput.value = "";
@@ -535,10 +562,8 @@ function endRound(isCorrect, selectedOption = "") {
         gameConfig.players[gameConfig.currentPlayer].correctAnswers += 1;
         updateGameStatus(
             `<div class="overlay-points">¡Correcto!🎉
-            <h2 class="answer-submited">${correctAnswer}</h2>
-            <span class="points-round">+300<img src="svg/points.svg" alt="puntos" class="svg-points-round"/></span>
-            <span class="points-round">+ ${pointsForTime}<img src="svg/points.svg" alt="puntos" class="svg-points-round"/></span>
-            </div>`
+            <h2 class="answer-submited">${correctAnswer+pointsForTime}</h2>
+            <span class="points-round">+300<img src="svg/points.svg" alt="puntos" class="svg-points-round"/></span>`
         ,"correct")
     } else {
         const correctAnswer =
@@ -652,23 +677,139 @@ function updateCurrentPlayer() {
     currentPlayerElement.prepend(turnTextElement);
 }
 
-function showFinalResults() {
+// Primero agregamos la función para tomar la captura
+async function takeScreenshot() {
+    try {
+        const finalResults = document.getElementById("finalResults");
+        
+        // Crear un contenedor temporal para la captura
+        const tempContainer = document.createElement("div");
+        tempContainer.style.position = "absolute";
+        tempContainer.style.left = "-9999px";
+        tempContainer.style.background = "#282828"; // Mantener el fondo oscuro
+        tempContainer.innerHTML = finalResults.innerHTML;
+        document.body.appendChild(tempContainer);
+
+        // Ajustar el ancho del contenedor temporal
+        tempContainer.style.width = finalResults.offsetWidth + "px";
+        
+        // Tomar la captura con html2canvas
+        const canvas = await html2canvas(tempContainer, {
+            backgroundColor: "#282828",
+            scale: 2, // Mejor calidad para dispositivos retina
+            useCORS: true, // Permitir imágenes de otros dominios
+            logging: false,
+        });
+        
+        // Eliminar el contenedor temporal
+        document.body.removeChild(tempContainer);
+
+        // Convertir el canvas a blob
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+        
+        // Intentar usar Web Share API primero (mejor para móviles)
+        if (navigator.share) {
+            const file = new File([blob], 'score.png', { type: 'image/png' });
+            await navigator.share({
+                files: [file],
+                title: 'Mi puntuación en Spotify Game',
+            });
+        } else {
+            // Fallback para navegadores que no soportan Web Share API
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'score.png';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+    } catch (error) {
+        console.error('Error al tomar la captura:', error);
+        alert('No se pudo compartir la captura. Intenta de nuevo.');
+    }
+}
+
+// Modificar la función showFinalResults para incluir el botón de captura
+async function showFinalResults() {
     document.getElementById("gameArea").style.display = "none";
     const finalResults = document.getElementById("finalResults");
     finalResults.style.display = "block";
 
     let resultsHTML = "";
+    
+    // Obtener información del artista o playlist
+    const selectionType = document.getElementById("selectionType").value;
+    let contentInfo = "";
+    
+    try {
+        if (selectionType === "artist") {
+            const artistName = document.getElementById("artistNameInput").value.trim();
+            const artists = await searchArtists(artistName);
+            if (artists && artists.length > 0) {
+                const artist = artists[0];
+                const imageUrl = artist.images && artist.images.length > 0 
+                    ? artist.images[0].url 
+                    : "https://placehold.co/200x200?text=No+Image";
+                const followers = artist.followers?.total 
+                    ? new Intl.NumberFormat().format(artist.followers.total) 
+                    : "0";
+                
+                contentInfo = `
+                    <div class="content-info">
+                        <img src="${imageUrl}" alt="${artist.name}" class="content-thumbnail" crossorigin="anonymous">
+                        <div class="content-details">
+                            <h3>${artist.name}</h3>
+                            <p>${followers} seguidores</p>
+                            <p>Popularidad: ${artist.popularity || 0}%</p>
+                        </div>
+                    </div>
+                `;
+            }
+        } else {
+            const response = await fetch(
+                `https://api.spotify.com/v1/playlists/${playlistId}`,
+                {
+                    headers: { Authorization: `Bearer ${accessToken}` }
+                }
+            );
+            const playlist = await response.json();
+            
+            if (playlist) {
+                const imageUrl = playlist.images && playlist.images.length > 0 
+                    ? playlist.images[0].url 
+                    : "https://placehold.co/200x200?text=No+Image";
+                
+                contentInfo = `
+                    <div class="content-info">
+                        <img src="${imageUrl}" alt="${playlist.name}" class="content-thumbnail" crossorigin="anonymous">
+                        <div class="content-details">
+                            <h3>${playlist.name}</h3>
+                            <p>Por: ${playlist.owner?.display_name || 'Usuario desconocido'}</p>
+                            <p>${playlist.tracks?.total || 0} canciones</p>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+    } catch (error) {
+        console.error("Error al obtener información:", error);
+        contentInfo = `<p class="error-message">No se pudo cargar la información</p>`;
+    }
 
+    // Agregar la información del contenido antes de los resultados
+    resultsHTML += contentInfo;
+
+    // Agregar el mensaje del ganador en modo multijugador
     if (gameConfig.mode === "multi") {
         const winner =
             gameConfig.players.player1.score > gameConfig.players.player2.score
                 ? gameConfig.players.player1.name
-                : gameConfig.players.player1.score <
-                  gameConfig.players.player2.score
+                : gameConfig.players.player1.score < gameConfig.players.player2.score
                 ? gameConfig.players.player2.name
                 : "Empate";
 
-        // Mensaje del ganador en la parte superior
         resultsHTML += `
             <h2 class="final-score-winner">${winner} 🏆</h2>
         `;
@@ -705,17 +846,26 @@ function showFinalResults() {
         `;
     }
 
-    // Botón de "Volver a Jugar"
+    // Botones de "Volver a Jugar" y "Compartir"
     resultsHTML += `
-        <button id="playAgainButton" class="btn btn-primary">Volver a Jugar</button>
+        <div class="buttons-container">
+        <button id="shareButton" class="btn btn-secondary">
+                <img src="svg/share.svg" alt="Compartir" class="share-icon"/>
+                Compartir
+            </button>
+            <button id="playAgainButton" class="btn btn-primary">Volver a Jugar</button>
+            
+        </div>
     `;
 
     finalResults.innerHTML = resultsHTML;
 
-    // Agregar listener al botón de "Volver a Jugar"
+    // Agregar listeners a los botones
     document.getElementById("playAgainButton").addEventListener("click", () => {
-        resetGame(); // Volver a la configuración inicial del juego
+        resetGame();
     });
+    
+    document.getElementById("shareButton").addEventListener("click", takeScreenshot);
 }
 
 function updateGameStatus(message, status) {
