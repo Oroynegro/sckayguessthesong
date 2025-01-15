@@ -243,11 +243,98 @@
 
             <!-- Resultados finales -->
             <div id="finalResults" class="final-results" style="display: none">
-                <h2>¡Fin del Juego!</h2>
-                <div id="finalScores"></div>
+                <!-- Contenedor para el ganador en modo multijugador -->
+                <h2
+                    id="winnerDisplay"
+                    class="final-score-winner"
+                    style="display: none"
+                ></h2>
+
+                <!-- Información del contenido (artista/playlist) -->
+                <!-- Modificar el contenedor de la imagen en el HTML -->
+                <div id="contentInfoContainer" class="content-info">
+                    <div class="content-thumbnail-container skeleton-loading">
+                        <img
+                            id="contentImage"
+                            src="https://placehold.co/200x200?text=Loading"
+                            alt="Content"
+                            class="content-thumbnail"
+                            crossorigin="anonymous"
+                        />
+                    </div>
+                    <div class="content-details">
+                        <h3 id="contentTitle">Cargando...</h3>
+                        <p id="contentSubtitle1">...</p>
+                        <p id="contentSubtitle2">...</p>
+                    </div>
+                </div>
+
+                <!-- Jugador 1 -->
+                <div class="player-info-final">
+                    <span id="player1Name" class="player-name-final"
+                        >Jugador 1</span
+                    >
+                    <span class="separator-1-final">:</span>
+                    <span id="player1Score" class="score-final">0</span>
+                    <span class="emoji-final">
+                        <img
+                            src="svg/points.svg"
+                            alt="puntos"
+                            class="svg-points-final"
+                        />
+                    </span>
+                </div>
+                <div class="player-stats-final">
+                    <span id="player1Correct" class="correct-answer-final"
+                        >0</span
+                    >
+                    <span class="separator-2-final">/</span>
+                    <span id="player1Total" class="total-rounds-final">0</span>
+                </div>
+
+                <!-- Jugador 2 (inicialmente oculto) -->
+                <div id="player2Container" style="display: none">
+                    <div class="player-info-final">
+                        <span id="player2Name" class="player-name-final"
+                            >Jugador 2</span
+                        >
+                        <span class="separator-1-final">:</span>
+                        <span id="player2Score" class="score-final">0</span>
+                        <span class="emoji-final">
+                            <img
+                                src="svg/points.svg"
+                                alt="puntos"
+                                class="svg-points-final"
+                            />
+                        </span>
+                    </div>
+                    <div class="player-stats-final">
+                        <span id="player2Correct" class="correct-answer-final"
+                            >0</span
+                        >
+                        <span class="separator-2-final">/</span>
+                        <span id="player2Total" class="total-rounds-final"
+                            >0</span
+                        >
+                    </div>
+                </div>
             </div>
+
+            <!-- Botones finales -->
             <div id="finalBtn" class="final-Btn" style="display: none">
-                <button onclick="resetGame()">Jugar de Nuevo</button>
+                <div class="buttons-container">
+                    <button id="shareButton" class="btn btn-secondary">
+                        <img
+                            src="svg/share.svg"
+                            alt="Compartir"
+                            class="share-icon"
+                        />
+                        Compartir
+                    </button>
+                    <button id="playAgainButton" class="btn btn-primary">
+                        Volver a Jugar
+                    </button>
+                </div>
             </div>
         </div>
         <script src="./main.js"></script>

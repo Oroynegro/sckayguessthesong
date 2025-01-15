@@ -67,7 +67,7 @@
 }
 
 .btn-primary {
-    background-color: #1DB954;
+    background-color: #1db954;
     color: white;
     border: none;
 }
@@ -90,8 +90,6 @@
     width: 20px;
     height: 20px;
 }
-
-
 
 .overlay-points {
     position: fixed;
@@ -646,6 +644,53 @@ input:disabled {
     color: #ffff92;
     margin: 40px 0;
 }
+/* Contenedor de imagen con skeleton loading */
+.content-thumbnail-container {
+    position: relative;
+    width: 200px; /* O el tamaño que uses */
+    height: 200px;
+    background: #f0f0f0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* Efecto skeleton */
+.skeleton-loading::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* Imagen con fade in */
+.content-thumbnail {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.content-thumbnail.loaded {
+    opacity: 1;
+}
 
 @media (max-width: 600px) {
     .game-info {
@@ -742,7 +787,7 @@ input:disabled {
     }
     .correct-answer-final,
     .total-rounds-final {
-        font-size: 2.em;
+        font-size: 1.6em;
         color: #1ed760;
     }
     .player-stats-final {
@@ -788,7 +833,7 @@ input:disabled {
     .content-details h3 {
         font-size: 1em;
     }
-    
+
     .content-details p {
         font-size: 0.6em;
     }

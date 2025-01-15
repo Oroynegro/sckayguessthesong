@@ -256,7 +256,6 @@ async function getTracksByArtist(artistName, isFirstRound = true) {
         return null;
     }
 }
-
 document
     .querySelector("#gameCategory")
     .addEventListener("change", ocultarLevel, selectionTypeChange);
@@ -269,6 +268,7 @@ function ocultarLevel() {
         const levelSelect = document.querySelector(".level-select");
         if (levelSelect) {
             levelSelect.style.display = "none";
+            console.log("artist");
         }
         const optionToDisable = document.querySelector(
             "#selectionType option[value='artist']"
@@ -293,6 +293,7 @@ function ocultarLevel() {
         const levelSelect = document.querySelector(".level-select");
         if (levelSelect) {
             levelSelect.style.display = "flex";
+            console.log("song");
         }
         const optionToDisable = document.querySelector(
             "#selectionType option[value='artist']"
@@ -320,11 +321,18 @@ document.getElementById("roundsNumber").addEventListener("input", function () {
 
     if (currentValue > max) {
         this.value = max; // Ajustar el valor al máximo permitido si lo excede
+        console.log("Valor ajustado al máximo permitido:", max);
     }
 });
 
 // Función para actualizar el valor máximo basado en modo y dificultad
 function actualizarMaximo() {
+    console.log(
+        "Valor difficultySelect:",
+        document.getElementById("difficultySelect").value
+    );
+    console.log("Valor gameMode:", document.getElementById("gameMode").value);
+
     const roundsInput = document.getElementById("roundsNumber");
 
     if (
@@ -332,15 +340,17 @@ function actualizarMaximo() {
         document.getElementById("difficultySelect").value === "normal"
     ) {
         roundsInput.max = 10;
+        console.log("Max value set to 10");
     } else if (
         document.getElementById("gameMode").value === "multi" &&
         document.getElementById("difficultySelect").value === "normal"
     ) {
         roundsInput.max = 5;
-
+        console.log("Max value set to 5");
         document.getElementById("player2").style.display = "block";
     } else {
         roundsInput.max = 1000;
+        console.log("Max value set to 1000");
     }
 }
 
@@ -498,6 +508,7 @@ function updatePlayer(trackId) {
 
             // Agregar el evento de carga solo la primera vez
             iframe.onload = () => {
+                console.log("Spotify player loaded");
                 resolve();
             };
 
@@ -505,6 +516,7 @@ function updatePlayer(trackId) {
         } else {
             // Si el iframe ya existe, solo actualizamos el src y resolvemos
             iframe.onload = () => {
+                console.log("Spotify player updated");
                 resolve();
             };
         }
@@ -554,6 +566,10 @@ function checkGuess(isTimeOut = false) {
     ) {
         isCorrect = true;
     }
+
+    console.log("Guess:", guess);
+    console.log("Correct Answer:", correctAnswer);
+    console.log("Is Correct:", isCorrect);
 
     clearInterval(timerInterval);
     endRound(isCorrect, ""); // Pasar indicador de coincidencia parcial
@@ -785,49 +801,123 @@ async function takeScreenshot() {
     }
 }
 
+// Función para precargar imagen
+function preloadImage(url) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.src = url;
+        img.onload = () => resolve(url);
+        img.onerror = () => reject(new Error("Error loading image"));
+    });
+}
+
+// Función para actualizar la imagen con fade
+async function updateContentImage(imageUrl) {
+    const container = document.querySelector(".content-thumbnail-container");
+    const img = document.getElementById("contentImage");
+
+    try {
+        // Mantener el skeleton mientras se carga
+        container.classList.add("skeleton-loading");
+        img.classList.remove("loaded");
+
+        // Precargar la imagen
+        await preloadImage(imageUrl);
+
+        // Actualizar la imagen y mostrarla con fade
+        img.src = imageUrl;
+        img.classList.add("loaded");
+        container.classList.remove("skeleton-loading");
+    } catch (error) {
+        // En caso de error, mostrar imagen de fallback
+        img.src = "https://placehold.co/200x200?text=No+Image";
+        img.classList.add("loaded");
+        container.classList.remove("skeleton-loading");
+        console.error("Error loading image:", error);
+    }
+}
+
 // Modificar la función showFinalResults para incluir el botón de captura
 async function showFinalResults() {
+    // Ocultar área de juego
     document.getElementById("gameArea").style.display = "none";
+
+    // Mostrar contenedores de resultados
     const finalResults = document.getElementById("finalResults");
     const finalBtn = document.getElementById("finalBtn");
     finalResults.style.display = "block";
     finalBtn.style.display = "block";
 
-    let resultsHTML = "";
-    let resultsHTMLBtn = "";
+    // Actualizar información de jugadores
+    document.getElementById("player1Name").textContent =
+        gameConfig.players.player1.name;
+    document.getElementById("player1Score").textContent =
+        gameConfig.players.player1.score;
+    document.getElementById("player1Correct").textContent =
+        gameConfig.players.player1.correctAnswers;
+    document.getElementById("player1Total").textContent = gameConfig.rounds;
 
-    // Obtener información del artista o playlist
-    const selectionType = document.getElementById("selectionType").value;
-    let contentInfo = "";
+    // Manejar modo multijugador
+    const winnerDisplay = document.getElementById("winnerDisplay");
+    const player2Container = document.getElementById("player2Container");
 
+    if (gameConfig.mode === "multi") {
+        // Mostrar contenedor del jugador 2
+        player2Container.style.display = "block";
+
+        // Actualizar información del jugador 2
+        document.getElementById("player2Name").textContent =
+            gameConfig.players.player2.name;
+        document.getElementById("player2Score").textContent =
+            gameConfig.players.player2.score;
+        document.getElementById("player2Correct").textContent =
+            gameConfig.players.player2.correctAnswers;
+        document.getElementById("player2Total").textContent = gameConfig.rounds;
+
+        // Mostrar y actualizar ganador
+        const winner =
+            gameConfig.players.player1.score > gameConfig.players.player2.score
+                ? gameConfig.players.player1.name
+                : gameConfig.players.player1.score <
+                  gameConfig.players.player2.score
+                ? gameConfig.players.player2.name
+                : "Empate";
+
+        winnerDisplay.textContent = `${winner} 🏆`;
+        winnerDisplay.style.display = "block";
+    } else {
+        // Ocultar elementos del modo multijugador
+        winnerDisplay.style.display = "none";
+        player2Container.style.display = "none";
+    }
+
+    // Actualizar información del contenido (artista/playlist)
     try {
+        const selectionType = document.getElementById("selectionType").value;
+
         if (selectionType === "artist") {
             const artistName = document
                 .getElementById("artistNameInput")
                 .value.trim();
             const artists = await searchArtists(artistName);
+
             if (artists && artists.length > 0) {
                 const artist = artists[0];
-                const imageUrl =
-                    artist.images && artist.images.length > 0
-                        ? artist.images[0].url
-                        : "https://placehold.co/200x200?text=No+Image";
-                const followers = artist.followers?.total
-                    ? new Intl.NumberFormat().format(artist.followers.total)
-                    : "0";
-
-                contentInfo = `
-                    <div class="content-info">
-                        <img src="${imageUrl}" alt="${
-                    artist.name
-                }" class="content-thumbnail" crossorigin="anonymous">
-                        <div class="content-details">
-                            <h3>${artist.name}</h3>
-                            <p>${followers} seguidores</p>
-                            <p>Popularidad: ${artist.popularity || 0}%</p>
-                        </div>
-                    </div>
-                `;
+                // Usar la nueva función para actualizar la imagen
+                await updateContentImage(
+                    artist.images?.[0]?.url ||
+                        "https://placehold.co/200x200?text=No+Image"
+                );
+                document.getElementById("contentTitle").textContent =
+                    artist.name;
+                document.getElementById(
+                    "contentSubtitle1"
+                ).textContent = `${new Intl.NumberFormat().format(
+                    artist.followers?.total || 0
+                )} seguidores`;
+                document.getElementById(
+                    "contentSubtitle2"
+                ).textContent = `Popularidad: ${artist.popularity || 0}%`;
             }
         } else {
             const response = await fetch(
@@ -839,100 +929,36 @@ async function showFinalResults() {
             const playlist = await response.json();
 
             if (playlist) {
-                const imageUrl =
-                    playlist.images && playlist.images.length > 0
-                        ? playlist.images[0].url
-                        : "https://placehold.co/200x200?text=No+Image";
-
-                contentInfo = `
-                    <div class="content-info">
-                        <img src="${imageUrl}" alt="${
-                    playlist.name
-                }" class="content-thumbnail" crossorigin="anonymous">
-                        <div class="content-details">
-                            <h3>${playlist.name}</h3>
-                            <p>Por: ${
-                                playlist.owner?.display_name ||
-                                "Usuario desconocido"
-                            }</p>
-                            <p>${playlist.tracks?.total || 0} canciones</p>
-                        </div>
-                    </div>
-                `;
+                // Usar la nueva función para actualizar la imagen
+                await updateContentImage(
+                    playlist.images?.[0]?.url ||
+                        "https://placehold.co/200x200?text=No+Image"
+                );
+                document.getElementById("contentTitle").textContent =
+                    playlist.name;
+                document.getElementById(
+                    "contentSubtitle1"
+                ).textContent = `Por: ${
+                    playlist.owner?.display_name || "Usuario desconocido"
+                }`;
+                document.getElementById("contentSubtitle2").textContent = `${
+                    playlist.tracks?.total || 0
+                } canciones`;
             }
         }
     } catch (error) {
         console.error("Error al obtener información:", error);
-        contentInfo = `<p class="error-message">No se pudo cargar la información</p>`;
+        await updateContentImage("https://placehold.co/200x200?text=Error");
+        document.getElementById("contentTitle").textContent = "Error al cargar";
+        document.getElementById("contentSubtitle1").textContent =
+            "No se pudo obtener la información";
+        document.getElementById("contentSubtitle2").textContent = "";
     }
 
-    // Agregar el mensaje del ganador en modo multijugador
-    if (gameConfig.mode === "multi") {
-        const winner =
-            gameConfig.players.player1.score > gameConfig.players.player2.score
-                ? gameConfig.players.player1.name
-                : gameConfig.players.player1.score <
-                  gameConfig.players.player2.score
-                ? gameConfig.players.player2.name
-                : "Empate";
-
-        resultsHTML += `
-            <h2 class="final-score-winner">${winner} 🏆</h2>
-        `;
-    }
-
-    // Detalles de los jugadores
-    resultsHTML += `
-        <div class="player-info-final">
-            <span class="player-name-final">${gameConfig.players.player1.name}</span>
-            <span class="separator-1-final">:</span>
-            <span class="score-final">${gameConfig.players.player1.score}</span>
-            <span class="emoji-final"><img src="svg/points.svg" alt="puntos" class="svg-points-final"/></span>
-        </div>
-        <div class="player-stats-final">
-            <span class="correct-answer-final">${gameConfig.players.player1.correctAnswers}</span>
-            <span class="separator-2-final">/</span>
-            <span class="total-rounds-final">${gameConfig.rounds}</span>
-        </div>
-    `;
-
-    if (gameConfig.mode === "multi") {
-        resultsHTML += `
-            <div class="player-info-final">
-                <span class="player-name-final">${gameConfig.players.player2.name}</span>
-                <span class="separator-1-final">:</span>
-                <span class="score-final">${gameConfig.players.player2.score}</span>
-                <span class="emoji-final"><img src="svg/points.svg" alt="puntos" class="svg-points-final"/></span>
-            </div>
-            <div class="player-stats-final">
-                <span class="correct-answer-final">${gameConfig.players.player2.correctAnswers}</span>
-                <span class="separator-2-final">/</span>
-                <span class="total-rounds-final">${gameConfig.rounds}</span>
-            </div>
-        `;
-    }
-
-    // Botones de "Volver a Jugar" y "Compartir"
-    resultsHTMLBtn += `
-        <div class="buttons-container">
-        <button id="shareButton" class="btn btn-secondary">
-                <img src="svg/share.svg" alt="Compartir" class="share-icon"/>
-                Compartir
-            </button>
-            <button id="playAgainButton" class="btn btn-primary">Volver a Jugar</button>
-            
-        </div>
-    `;
-
-    finalResults.innerHTML = resultsHTML + contentInfo;
-
-    finalBtn.innerHTML = resultsHTMLBtn;
-
-    // Agregar listeners a los botones
-    document.getElementById("playAgainButton").addEventListener("click", () => {
-        resetGame();
-    });
-
+    // Configurar event listeners
+    document
+        .getElementById("playAgainButton")
+        .addEventListener("click", resetGame);
     document
         .getElementById("shareButton")
         .addEventListener("click", takeScreenshot);
