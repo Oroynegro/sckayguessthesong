@@ -533,16 +533,26 @@ function endRound(isCorrect, selectedOption = "") {
         pointsForTime = 50;
     }
 
-    if (isCorrect) {
-        const correctAnswer =
-            gameConfig.category === "song"
-                ? currentTrack.name
-                : currentTrack.artists[0].name;
+    const correctAnswer =
+        gameConfig.category === "song"
+            ? currentTrack.name
+            : currentTrack.artists[0].name;
+
+    if (guessInputShow === "") {
+        // Caso de entrada vacía (sin respuesta)
+        updateGameStatus(
+            `<div class="overlay-points">La respuesta correcta era: 
+            <h2 class="answer-submited">${correctAnswer}</h2>
+            <span class="points-round">+0<img src="svg/points.svg" alt="puntos" class="svg-points-round"/></span></div>`,
+            "neutral"
+        );
+    } else if (isCorrect) {
+        // Caso de respuesta correcta
         gameConfig.players[gameConfig.currentPlayer].score +=
             300 + pointsForTime;
         gameConfig.players[gameConfig.currentPlayer].correctAnswers += 1;
         updateGameStatus(
-            `<div class="overlay-points">¡Correcto!🎉
+            `<div class="overlay-points">¡Correcto! 🎉 
             <h2 class="answer-submited">${correctAnswer}</h2>
             <span class="points-round">+${
                 pointsForTime + 300
@@ -550,24 +560,16 @@ function endRound(isCorrect, selectedOption = "") {
             "correct"
         );
     } else {
-        const correctAnswer =
-            gameConfig.category === "song"
-                ? currentTrack.name
-                : currentTrack.artists[0].name;
-
+        // Caso de respuesta incorrecta
         if (gameConfig.players[gameConfig.currentPlayer].score > 0) {
             gameConfig.players[gameConfig.currentPlayer].score -= 50;
         }
-
-        const incorrectMessage = guessInputShow
-            ? `<div class="overlay-points">¡Incorrecto! no era: <h2 class="answer-submited">${guessInputShow}</h2> era: 
+        updateGameStatus(
+            `<div class="overlay-points">¡Incorrecto! No era: <h2 class="answer-submited">${guessInputShow}</h2> era: 
             <h2 class="answer-submited">${correctAnswer}</h2>
-            <span class="points-round">-50<img src="svg/points.svg" alt="puntos" class="svg-points-round"/></span></div>`
-            : `<div class="overlay-points">¡Incorrecto! La respuesta correcta era: 
-            <h2 class="answer-submited">${correctAnswer}</h2>
-            <span class="points-round">-50<img src="svg/points.svg" alt="puntos" class="svg-points-round"/></span></div>`;
-
-        updateGameStatus(incorrectMessage, "incorrect");
+            <span class="points-round">-50<img src="svg/points.svg" alt="puntos" class="svg-points-round"/></span></div>`,
+            "incorrect"
+        );
     }
 
     updateScores();
@@ -1363,6 +1365,7 @@ function resetGame() {
     document.getElementById("gameConfig").style.display = "block";
     document.getElementById("gameArea").style.display = "none";
     document.getElementById("finalResults").style.display = "none";
+    document.getElementById("finalBtn").style.display = "none";
     gameConfig.players.player1.correctAnswers = 0;
     gameConfig.players.player2.correctAnswers = 0;
 }
