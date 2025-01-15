@@ -681,33 +681,43 @@ function updateCurrentPlayer() {
 async function takeScreenshot() {
     try {
         const finalResults = document.getElementById("finalResults");
-        
-        // Crear un contenedor temporal para la captura
-        const tempContainer = document.createElement("div");
+
+        // Clonar el nodo para evitar inconsistencias de estilo
+        const tempContainer = finalResults.cloneNode(true);
         tempContainer.style.position = "absolute";
         tempContainer.style.left = "-9999px";
-        tempContainer.style.background = "#282828"; // Mantener el fondo oscuro
-        tempContainer.innerHTML = finalResults.innerHTML;
+        tempContainer.style.background = "#282828"; // Fondo oscuro
+        tempContainer.style.width = finalResults.offsetWidth + "px";
         document.body.appendChild(tempContainer);
 
-        // Ajustar el ancho del contenedor temporal
-        tempContainer.style.width = finalResults.offsetWidth + "px";
-        
-        // Tomar la captura con html2canvas
+        // Mostrar un indicador de carga
+        const loadingMessage = document.createElement('div');
+        loadingMessage.textContent = 'Generando captura...';
+        loadingMessage.style.position = "fixed";
+        loadingMessage.style.top = "50%";
+        loadingMessage.style.left = "50%";
+        loadingMessage.style.transform = "translate(-50%, -50%)";
+        loadingMessage.style.backgroundColor = "#000";
+        loadingMessage.style.color = "#fff";
+        loadingMessage.style.padding = "10px 20px";
+        loadingMessage.style.borderRadius = "5px";
+        document.body.appendChild(loadingMessage);
+
+        // Tomar la captura
         const canvas = await html2canvas(tempContainer, {
             backgroundColor: "#282828",
-            scale: 2, // Mejor calidad para dispositivos retina
-            useCORS: true, // Permitir imágenes de otros dominios
-            logging: false,
+            scale: 2,
+            useCORS: true,
         });
-        
-        // Eliminar el contenedor temporal
-        document.body.removeChild(tempContainer);
 
-        // Convertir el canvas a blob
+        // Remover elementos temporales
+        document.body.removeChild(tempContainer);
+        document.body.removeChild(loadingMessage);
+
+        // Convertir a blob
         const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
-        
-        // Intentar usar Web Share API primero (mejor para móviles)
+
+        // Compartir o descargar
         if (navigator.share) {
             const file = new File([blob], 'score.png', { type: 'image/png' });
             await navigator.share({
@@ -715,14 +725,11 @@ async function takeScreenshot() {
                 title: 'Mi puntuación en Spotify Game',
             });
         } else {
-            // Fallback para navegadores que no soportan Web Share API
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
             a.download = 'score.png';
-            document.body.appendChild(a);
             a.click();
-            document.body.removeChild(a);
             URL.revokeObjectURL(url);
         }
     } catch (error) {
