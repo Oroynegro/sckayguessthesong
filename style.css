@@ -837,4 +837,8 @@ input:disabled {
     .content-details p {
         font-size: 0.6em;
     }
+    .content-thumbnail-container {
+        width: 150px; /* O el tamaño que uses */
+        height: 150px;
+    }
 }
