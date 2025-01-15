@@ -563,7 +563,7 @@ function endRound(isCorrect, selectedOption = "") {
         updateGameStatus(
             `<div class="overlay-points">¡Correcto!🎉
             <h2 class="answer-submited"></h2>
-            <span class="points-round">${correctAnswer}+${pointsForTime}<img src="svg/points.svg" alt="puntos" class="svg-points-round"/></span>`
+            <span class="points-round">${pointsForTime+correctAnswer}<img src="svg/points.svg" alt="puntos" class="svg-points-round"/></span>`
         ,"correct")
     } else {
         const correctAnswer =
