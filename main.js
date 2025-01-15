@@ -124,17 +124,24 @@ function selectionTypeChange(e) {
 
 const artistTracksCache = {}; // Caché para almacenar canciones por artista y dificultad
 
-async function getTracksByArtist(artistName) {
+// Cache para promesas de carga
+const loadingPromises = {};
+
+async function getTracksByArtist(artistName, isFirstRound = true) {
     if (!accessToken) {
         accessToken = await getAccessToken();
     }
 
-    // Obtener el nivel de dificultad
     const difficulty = document.getElementById("difficultySelect").value;
 
-    // Verificar si ya tenemos canciones en caché para este artista y dificultad
+    // Retornar canciones cacheadas si existen
     if (artistTracksCache[artistName]?.[difficulty]) {
         return artistTracksCache[artistName][difficulty];
+    }
+
+    // Si ya hay una promesa de carga en curso, esperar a que termine
+    if (loadingPromises[`${artistName}-${difficulty}`]) {
+        return loadingPromises[`${artistName}-${difficulty}`];
     }
 
     try {
@@ -155,10 +162,8 @@ async function getTracksByArtist(artistName) {
             return null;
         }
 
-        let tracks = [];
-
+        // Modo normal - sin cambios
         if (difficulty === "normal") {
-            // Obtener las canciones más populares (top 10)
             const topTracksResponse = await fetch(
                 `https://api.spotify.com/v1/artists/${artistId}/top-tracks?market=US`,
                 {
@@ -166,9 +171,19 @@ async function getTracksByArtist(artistName) {
                 }
             );
             const topTracksData = await topTracksResponse.json();
-            tracks = topTracksData.tracks.slice(0, 10); // Solo tomar las primeras 10 canciones
-        } else {
-            // Obtener todas las canciones del artista (modo extremo)
+            const tracks = topTracksData.tracks.slice(0, 10);
+
+            // Guardar en caché
+            if (!artistTracksCache[artistName]) {
+                artistTracksCache[artistName] = {};
+            }
+            artistTracksCache[artistName][difficulty] = tracks;
+            return tracks;
+        }
+
+        // Modo extremo con carga progresiva
+        const loadingPromise = (async () => {
+            const tracks = [];
             const albumsResponse = await fetch(
                 `https://api.spotify.com/v1/artists/${artistId}/albums?market=US&include_groups=album,single&limit=50`,
                 {
@@ -177,8 +192,13 @@ async function getTracksByArtist(artistName) {
             );
             const albumsData = await albumsResponse.json();
 
-            // Recorrer los álbumes para obtener las canciones de cada uno
-            for (let album of albumsData.items) {
+            // Si es la primera ronda, cargar solo las primeras 20 canciones
+            const initialAlbums = isFirstRound
+                ? albumsData.items.slice(0, 2)
+                : albumsData.items;
+
+            // Cargar canciones de los álbumes iniciales
+            for (let album of initialAlbums) {
                 const albumTracksResponse = await fetch(
                     `https://api.spotify.com/v1/albums/${album.id}/tracks`,
                     {
@@ -188,13 +208,46 @@ async function getTracksByArtist(artistName) {
                 const albumTracksData = await albumTracksResponse.json();
                 tracks.push(...albumTracksData.items);
             }
-        }
 
-        // Guardar las canciones en caché según el nivel de dificultad
-        if (!artistTracksCache[artistName]) {
-            artistTracksCache[artistName] = {};
-        }
-        artistTracksCache[artistName][difficulty] = tracks;
+            // Si es la primera ronda, iniciar la carga del resto en segundo plano
+            if (isFirstRound) {
+                setTimeout(async () => {
+                    for (let album of albumsData.items.slice(2)) {
+                        const albumTracksResponse = await fetch(
+                            `https://api.spotify.com/v1/albums/${album.id}/tracks`,
+                            {
+                                headers: {
+                                    Authorization: `Bearer ${accessToken}`,
+                                },
+                            }
+                        );
+                        const albumTracksData =
+                            await albumTracksResponse.json();
+                        tracks.push(...albumTracksData.items);
+                    }
+
+                    // Actualizar el caché con todas las canciones
+                    if (!artistTracksCache[artistName]) {
+                        artistTracksCache[artistName] = {};
+                    }
+                    artistTracksCache[artistName][difficulty] = tracks;
+
+                    console.log(
+                        `Carga completa: ${tracks.length} canciones para ${artistName}`
+                    );
+                }, 0);
+            }
+
+            return tracks;
+        })();
+
+        // Guardar la promesa de carga
+        loadingPromises[`${artistName}-${difficulty}`] = loadingPromise;
+
+        const tracks = await loadingPromise;
+
+        // Limpiar la promesa de carga una vez completada
+        delete loadingPromises[`${artistName}-${difficulty}`];
 
         return tracks;
     } catch (error) {
@@ -203,6 +256,7 @@ async function getTracksByArtist(artistName) {
         return null;
     }
 }
+
 document
     .querySelector("#gameCategory")
     .addEventListener("change", ocultarLevel, selectionTypeChange);
