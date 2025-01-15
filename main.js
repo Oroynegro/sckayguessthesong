@@ -55,22 +55,33 @@ fullscreenBtn.addEventListener("click", () => {
     }
 });
 
+// Función auxiliar para limpiar strings
+function cleanString(str) {
+    if (!str) return "";
+    // Elimina escape characters y normaliza apóstrofes
+    return str.replace(/\\'/g, "'").replace(/\\/g, "").trim();
+}
+
 // Función para generar opciones múltiples
 async function generateMultipleChoiceOptions(correctTrack, allTracks) {
     const options = new Set();
     const correctOption =
         gameConfig.category === "song"
-            ? correctTrack.name
-            : correctTrack.artists[0].name;
+            ? cleanString(correctTrack.name)
+            : cleanString(correctTrack.artists[0].name);
     options.add(correctOption);
 
     // Filtrar tracks únicos por artista o canción
     let availableOptions = [];
     if (gameConfig.category === "song") {
-        availableOptions = [...new Set(allTracks.map((track) => track.name))];
+        availableOptions = [
+            ...new Set(allTracks.map((track) => cleanString(track.name))),
+        ];
     } else {
         availableOptions = [
-            ...new Set(allTracks.map((track) => track.artists[0].name)),
+            ...new Set(
+                allTracks.map((track) => cleanString(track.artists[0].name))
+            ),
         ];
     }
 
@@ -1278,8 +1289,10 @@ function enableMultipleChoiceButtons() {
 function checkMultipleChoiceGuess(selectedOption) {
     const correctAnswer =
         gameConfig.category === "song"
-            ? currentTrack.name
-            : currentTrack.artists[0].name;
+            ? cleanString(currentTrack.name)
+            : cleanString(currentTrack.artists[0].name);
+
+    selectedOption = cleanString(selectedOption);
 
     const isCorrect =
         selectedOption &&
@@ -1288,7 +1301,7 @@ function checkMultipleChoiceGuess(selectedOption) {
     // Deshabilitar todos los botones de opción
     const buttons = document.querySelectorAll(".option-button");
     buttons.forEach((button) => {
-        const buttonOption = button.dataset.option;
+        const buttonOption = cleanString(button.dataset.option);
         button.disabled = true;
 
         if (normalizeString(buttonOption) === normalizeString(correctAnswer)) {
@@ -1302,7 +1315,6 @@ function checkMultipleChoiceGuess(selectedOption) {
     });
 
     if (!selectedOption) {
-        // Caso: tiempo agotado y no se seleccionó ninguna opción
         updateGameStatus(
             "¡Se acabó el tiempo! No seleccionaste ninguna opción.",
             "error"
@@ -1310,8 +1322,6 @@ function checkMultipleChoiceGuess(selectedOption) {
     }
 
     clearInterval(timerInterval);
-
-    // Finalizar la ronda
     endRound(isCorrect, selectedOption);
 }
 
