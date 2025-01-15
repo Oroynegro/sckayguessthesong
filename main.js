@@ -562,7 +562,7 @@ function endRound(isCorrect, selectedOption = "") {
         gameConfig.players[gameConfig.currentPlayer].correctAnswers += 1;
         updateGameStatus(
             `<div class="overlay-points">¡Correcto!🎉
-            <h2 class="answer-submited"></h2>
+            <h2 class="answer-submited">${correctAnswer}</h2>
             <span class="points-round">${pointsForTime+300}<img src="svg/points.svg" alt="puntos" class="svg-points-round"/></span>`
         ,"correct")
     } else {
