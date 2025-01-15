@@ -562,8 +562,8 @@ function endRound(isCorrect, selectedOption = "") {
         gameConfig.players[gameConfig.currentPlayer].correctAnswers += 1;
         updateGameStatus(
             `<div class="overlay-points">¡Correcto!🎉
-            <h2 class="answer-submited">${correctAnswer+pointsForTime}</h2>
-            <span class="points-round">+300<img src="svg/points.svg" alt="puntos" class="svg-points-round"/></span>`
+            <h2 class="answer-submited">${correctAnswer}+${pointsForTime}</h2>
+            <span class="points-round"><img src="svg/points.svg" alt="puntos" class="svg-points-round"/></span>`
         ,"correct")
     } else {
         const correctAnswer =
@@ -1368,6 +1368,7 @@ function resetGame() {
     document.getElementById("gameConfig").style.display = "block";
     document.getElementById("gameArea").style.display = "none";
     document.getElementById("finalResults").style.display = "none";
+    document.getElementById("finalBtn").style.display = "none";
     gameConfig.players.player1.correctAnswers = 0;
     gameConfig.players.player2.correctAnswers = 0;
 }
