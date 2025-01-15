@@ -185,18 +185,6 @@ async function getTracksByArtist(artistName) {
         }
         artistTracksCache[artistName][difficulty] = tracks;
 
-        // Mostrar cuántas canciones y detalles en la consola
-        console.log(
-            `Se obtuvieron ${tracks.length} canciones para el artista ${artistName}, dificultad: ${difficulty}`
-        );
-        tracks.forEach((track, index) => {
-            console.log(
-                `${index + 1}. ${track.name} - ${track.artists
-                    .map((artist) => artist.name)
-                    .join(", ")}`
-            );
-        });
-
         return tracks;
     } catch (error) {
         console.error("Error al obtener las canciones del artista:", error);
@@ -216,7 +204,6 @@ function ocultarLevel() {
         const levelSelect = document.querySelector(".level-select");
         if (levelSelect) {
             levelSelect.style.display = "none";
-            console.log("artist");
         }
         const optionToDisable = document.querySelector(
             "#selectionType option[value='artist']"
@@ -241,7 +228,6 @@ function ocultarLevel() {
         const levelSelect = document.querySelector(".level-select");
         if (levelSelect) {
             levelSelect.style.display = "flex";
-            console.log("song");
         }
         const optionToDisable = document.querySelector(
             "#selectionType option[value='artist']"
@@ -269,18 +255,11 @@ document.getElementById("roundsNumber").addEventListener("input", function () {
 
     if (currentValue > max) {
         this.value = max; // Ajustar el valor al máximo permitido si lo excede
-        console.log("Valor ajustado al máximo permitido:", max);
     }
 });
 
 // Función para actualizar el valor máximo basado en modo y dificultad
 function actualizarMaximo() {
-    console.log(
-        "Valor difficultySelect:",
-        document.getElementById("difficultySelect").value
-    );
-    console.log("Valor gameMode:", document.getElementById("gameMode").value);
-
     const roundsInput = document.getElementById("roundsNumber");
 
     if (
@@ -288,17 +267,15 @@ function actualizarMaximo() {
         document.getElementById("difficultySelect").value === "normal"
     ) {
         roundsInput.max = 10;
-        console.log("Max value set to 10");
     } else if (
         document.getElementById("gameMode").value === "multi" &&
         document.getElementById("difficultySelect").value === "normal"
     ) {
         roundsInput.max = 5;
-        console.log("Max value set to 5");
+
         document.getElementById("player2").style.display = "block";
     } else {
         roundsInput.max = 1000;
-        console.log("Max value set to 1000");
     }
 }
 
@@ -390,11 +367,11 @@ document.getElementById("gameMode").addEventListener("change", function (e) {
 
 async function getAccessToken() {
     try {
-        const response = await fetch('/api/getAccessToken');
+        const response = await fetch("/api/getAccessToken");
         const data = await response.json();
         return data.access_token;
     } catch (error) {
-        console.error('Error al obtener el token:', error);
+        console.error("Error al obtener el token:", error);
         return null;
     }
 }
@@ -442,32 +419,31 @@ function updatePlayer(trackId) {
     return new Promise((resolve) => {
         const playerContainer = document.getElementById("playerContainer");
         let iframe = document.querySelector("#playerContainer .i-frame");
-        
+
         // Si el iframe no existe, créalo
         if (!iframe) {
             iframe = document.createElement("iframe");
             iframe.width = "100%";
             iframe.height = "100px";
             iframe.frameBorder = "0";
-            iframe.allow = "autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture";
+            iframe.allow =
+                "autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture";
             iframe.loading = "lazy";
             iframe.className = "i-frame";
-            
+
             // Agregar el evento de carga solo la primera vez
             iframe.onload = () => {
-                console.log("Spotify player loaded");
                 resolve();
             };
-            
+
             playerContainer.appendChild(iframe);
         } else {
             // Si el iframe ya existe, solo actualizamos el src y resolvemos
             iframe.onload = () => {
-                console.log("Spotify player updated");
                 resolve();
             };
         }
-        
+
         // Actualizar la URL del iframe
         iframe.src = `https://open.spotify.com/embed/track/${trackId}?utm_source=generator`;
     });
@@ -512,16 +488,10 @@ function checkGuess(isTimeOut = false) {
         (correctAnswer.length >= minLength && guess.includes(correctAnswer))
     ) {
         isCorrect = true;
-        isPartialMatch = true; // Coincidencia parcial detectada
     }
 
-    console.log("Guess:", guess);
-    console.log("Correct Answer:", correctAnswer);
-    console.log("Is Correct:", isCorrect);
-    console.log("Is Partial Match:", isPartialMatch);
-
     clearInterval(timerInterval);
-    endRound(isCorrect, "", isPartialMatch); // Pasar indicador de coincidencia parcial
+    endRound(isCorrect, ""); // Pasar indicador de coincidencia parcial
     guessInput.value = "";
 }
 
@@ -563,8 +533,11 @@ function endRound(isCorrect, selectedOption = "") {
         updateGameStatus(
             `<div class="overlay-points">¡Correcto!🎉
             <h2 class="answer-submited">${correctAnswer}</h2>
-            <span class="points-round">+${pointsForTime+300}<img src="svg/points.svg" alt="puntos" class="svg-points-round"/></span>`
-        ,"correct")
+            <span class="points-round">+${
+                pointsForTime + 300
+            }<img src="svg/points.svg" alt="puntos" class="svg-points-round"/></span>`,
+            "correct"
+        );
     } else {
         const correctAnswer =
             gameConfig.category === "song"
@@ -677,7 +650,6 @@ function updateCurrentPlayer() {
     currentPlayerElement.prepend(turnTextElement);
 }
 
-// Primero agregamos la función para tomar la captura
 async function takeScreenshot() {
     try {
         const finalResults = document.getElementById("finalResults");
@@ -691,8 +663,8 @@ async function takeScreenshot() {
         document.body.appendChild(tempContainer);
 
         // Mostrar un indicador de carga
-        const loadingMessage = document.createElement('div');
-        loadingMessage.textContent = 'Generando captura...';
+        const loadingMessage = document.createElement("div");
+        loadingMessage.textContent = "Generando captura...";
         loadingMessage.style.position = "fixed";
         loadingMessage.style.top = "50%";
         loadingMessage.style.left = "50%";
@@ -715,26 +687,28 @@ async function takeScreenshot() {
         document.body.removeChild(loadingMessage);
 
         // Convertir a blob
-        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+        const blob = await new Promise((resolve) =>
+            canvas.toBlob(resolve, "image/png")
+        );
 
         // Compartir o descargar
         if (navigator.share) {
-            const file = new File([blob], 'score.png', { type: 'image/png' });
+            const file = new File([blob], "score.png", { type: "image/png" });
             await navigator.share({
                 files: [file],
-                title: 'Mi puntuación en Spotify Game',
+                title: "Mi puntuación en Spotify Game",
             });
         } else {
             const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
+            const a = document.createElement("a");
             a.href = url;
-            a.download = 'score.png';
+            a.download = "score.png";
             a.click();
             URL.revokeObjectURL(url);
         }
     } catch (error) {
-        console.error('Error al tomar la captura:', error);
-        alert('No se pudo compartir la captura. Intenta de nuevo.');
+        console.error("Error al tomar la captura:", error);
+        alert("No se pudo compartir la captura. Intenta de nuevo.");
     }
 }
 
@@ -749,27 +723,31 @@ async function showFinalResults() {
     let resultsHTML = "";
     let resultsHTMLBtn = "";
 
-    
     // Obtener información del artista o playlist
     const selectionType = document.getElementById("selectionType").value;
     let contentInfo = "";
-    
+
     try {
         if (selectionType === "artist") {
-            const artistName = document.getElementById("artistNameInput").value.trim();
+            const artistName = document
+                .getElementById("artistNameInput")
+                .value.trim();
             const artists = await searchArtists(artistName);
             if (artists && artists.length > 0) {
                 const artist = artists[0];
-                const imageUrl = artist.images && artist.images.length > 0 
-                    ? artist.images[0].url 
-                    : "https://placehold.co/200x200?text=No+Image";
-                const followers = artist.followers?.total 
-                    ? new Intl.NumberFormat().format(artist.followers.total) 
+                const imageUrl =
+                    artist.images && artist.images.length > 0
+                        ? artist.images[0].url
+                        : "https://placehold.co/200x200?text=No+Image";
+                const followers = artist.followers?.total
+                    ? new Intl.NumberFormat().format(artist.followers.total)
                     : "0";
-                
+
                 contentInfo = `
                     <div class="content-info">
-                        <img src="${imageUrl}" alt="${artist.name}" class="content-thumbnail" crossorigin="anonymous">
+                        <img src="${imageUrl}" alt="${
+                    artist.name
+                }" class="content-thumbnail" crossorigin="anonymous">
                         <div class="content-details">
                             <h3>${artist.name}</h3>
                             <p>${followers} seguidores</p>
@@ -782,22 +760,28 @@ async function showFinalResults() {
             const response = await fetch(
                 `https://api.spotify.com/v1/playlists/${playlistId}`,
                 {
-                    headers: { Authorization: `Bearer ${accessToken}` }
+                    headers: { Authorization: `Bearer ${accessToken}` },
                 }
             );
             const playlist = await response.json();
-            
+
             if (playlist) {
-                const imageUrl = playlist.images && playlist.images.length > 0 
-                    ? playlist.images[0].url 
-                    : "https://placehold.co/200x200?text=No+Image";
-                
+                const imageUrl =
+                    playlist.images && playlist.images.length > 0
+                        ? playlist.images[0].url
+                        : "https://placehold.co/200x200?text=No+Image";
+
                 contentInfo = `
                     <div class="content-info">
-                        <img src="${imageUrl}" alt="${playlist.name}" class="content-thumbnail" crossorigin="anonymous">
+                        <img src="${imageUrl}" alt="${
+                    playlist.name
+                }" class="content-thumbnail" crossorigin="anonymous">
                         <div class="content-details">
                             <h3>${playlist.name}</h3>
-                            <p>Por: ${playlist.owner?.display_name || 'Usuario desconocido'}</p>
+                            <p>Por: ${
+                                playlist.owner?.display_name ||
+                                "Usuario desconocido"
+                            }</p>
                             <p>${playlist.tracks?.total || 0} canciones</p>
                         </div>
                     </div>
@@ -809,15 +793,13 @@ async function showFinalResults() {
         contentInfo = `<p class="error-message">No se pudo cargar la información</p>`;
     }
 
-    // Agregar la información del contenido antes de los resultados
-    resultsHTML += contentInfo;
-
     // Agregar el mensaje del ganador en modo multijugador
     if (gameConfig.mode === "multi") {
         const winner =
             gameConfig.players.player1.score > gameConfig.players.player2.score
                 ? gameConfig.players.player1.name
-                : gameConfig.players.player1.score < gameConfig.players.player2.score
+                : gameConfig.players.player1.score <
+                  gameConfig.players.player2.score
                 ? gameConfig.players.player2.name
                 : "Empate";
 
@@ -869,15 +851,18 @@ async function showFinalResults() {
         </div>
     `;
 
-    finalResults.innerHTML = resultsHTML;
-    finalBtn.innerHTML = resultsHTMLBtn
+    finalResults.innerHTML = resultsHTML + contentInfo;
+
+    finalBtn.innerHTML = resultsHTMLBtn;
 
     // Agregar listeners a los botones
     document.getElementById("playAgainButton").addEventListener("click", () => {
         resetGame();
     });
-    
-    document.getElementById("shareButton").addEventListener("click", takeScreenshot);
+
+    document
+        .getElementById("shareButton")
+        .addEventListener("click", takeScreenshot);
 }
 
 function updateGameStatus(message, status) {
@@ -1344,10 +1329,10 @@ function startTimer() {
         timerInterval = setInterval(() => {
             timeLeft--;
             timer.textContent = timeLeft;
-    
+
             if (timeLeft <= 0) {
                 clearInterval(timerInterval);
-    
+
                 if (gameConfig.answerMode === "choice") {
                     checkMultipleChoiceGuess(null); // Marcar como incorrecta por falta de selección
                 } else if (gameConfig.answerMode === "text") {
@@ -1355,7 +1340,7 @@ function startTimer() {
                 }
             }
         }, 1000);
-    },1500);
+    }, 1500);
 }
 
 function resetGameUI() {
@@ -1368,7 +1353,6 @@ function resetGame() {
     document.getElementById("gameConfig").style.display = "block";
     document.getElementById("gameArea").style.display = "none";
     document.getElementById("finalResults").style.display = "none";
-    document.getElementById("finalBtn").style.display = "none";
     gameConfig.players.player1.correctAnswers = 0;
     gameConfig.players.player2.correctAnswers = 0;
 }

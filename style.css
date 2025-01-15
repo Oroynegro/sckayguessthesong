@@ -286,7 +286,6 @@ body {
 .points-round {
     display: inline-block;
     font-size: 3em;
-    color:#1db954;
 }
 .svg-points {
     width: 21px;
@@ -456,7 +455,6 @@ input {
     font-size: 1em;
 }
 .answer-submited {
-    display: block;
     color: #1ed760;
     font-size: 2em;
 }
@@ -684,7 +682,7 @@ input:disabled {
         margin-left: 2px;
     }
     .svg-points-final {
-        width: 26px;
+        width: 30px;
         margin-bottom: -4px;
     }
 
@@ -722,29 +720,29 @@ input:disabled {
         margin: 40px 0;
     }
     .score-final {
-        font-size: 1.8em;
+        font-size: 2.2em;
         color: #1ed760;
     }
     .player-name-final {
-        font-size: 1.8em;
+        font-size: 2.2em;
         color: #1ed760;
     }
     .emoji-final {
-        font-size: 1.8em;
+        font-size: 2.2em;
     }
     .separator-1-final {
-        font-size: 1.8em;
+        font-size: 2.2em;
         font-weight: 900;
         color: white;
     }
     .separator-2-final {
-        font-size: 1.2em;
-        font-weight: 900;
+        font-size: 1.6em;
+        font-weight: 200;
         color: white;
     }
     .correct-answer-final,
     .total-rounds-final {
-        font-size: 1.2em;
+        font-size: 2.em;
         color: #1ed760;
     }
     .player-stats-final {
