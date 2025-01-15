@@ -286,6 +286,7 @@ body {
 .points-round {
     display: inline-block;
     font-size: 3em;
+    color: #1ed760
 }
 .svg-points {
     width: 21px;
@@ -455,6 +456,7 @@ input {
     font-size: 1em;
 }
 .answer-submited {
+    display: block;
     color: #1ed760;
     font-size: 2em;
 }
