@@ -610,7 +610,7 @@ input:disabled {
 }
 #fullscreenBtn {
     position: absolute; /* La imagen se mantiene en su posición sin importar el scroll */
-    margin-left: 58%;
+    margin: -10px;
     padding: 0;
     z-index: 1000; /* Asegura que esté encima de otros elementos si es necesario */
     background-color: #282828;
@@ -791,8 +791,5 @@ input:disabled {
     
     .content-details p {
         font-size: 0.6em;
-    }
-    #fullscreenBtn {
-        margin-left: 80%;
     }
 }
