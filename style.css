@@ -50,7 +50,7 @@
     display: flex;
     gap: 15px;
     justify-content: center;
-    margin-top: 20px;
+    margin-top: 120px;
 }
 
 .btn {
@@ -67,13 +67,12 @@
 }
 
 .btn-primary {
-    background-color: #1db954;
+    background-color: #1DB954;
     color: white;
     border: none;
 }
 
 .btn-secondary {
-    background-color: #535353;
     color: white;
     border: none;
 }
@@ -91,6 +90,8 @@
     width: 20px;
     height: 20px;
 }
+
+
 
 .overlay-points {
     position: fixed;
@@ -787,7 +788,7 @@ input:disabled {
     .content-details h3 {
         font-size: 1em;
     }
-
+    
     .content-details p {
         font-size: 0.6em;
     }
