@@ -561,13 +561,19 @@ function endRound(isCorrect, selectedOption = "") {
         );
     } else {
         // Caso de respuesta incorrecta
+        let pointsLost = 0;
+
         if (gameConfig.players[gameConfig.currentPlayer].score > 0) {
-            gameConfig.players[gameConfig.currentPlayer].score -= 50;
+            pointsLost = 50;
+            gameConfig.players[gameConfig.currentPlayer].score -= pointsLost;
         }
+
         updateGameStatus(
             `<div class="overlay-points">¡Incorrecto! No era: <h2 class="answer-submited">${guessInputShow}</h2> era: 
             <h2 class="answer-submited">${correctAnswer}</h2>
-            <span class="points-round">-50<img src="svg/points.svg" alt="puntos" class="svg-points-round"/></span></div>`,
+            <span class="points-round">${
+                pointsLost > 0 ? `-${pointsLost}` : "+0"
+            }<img src="svg/points.svg" alt="puntos" class="svg-points-round"/></span></div>`,
             "incorrect"
         );
     }
