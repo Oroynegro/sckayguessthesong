@@ -849,13 +849,13 @@ async function showFinalResults() {
     finalBtn.style.display = "block";
 
     // Actualizar información de jugadores
-    document.getElementById("player1Name").textContent =
+    document.getElementById("player1NameFinal").textContent =
         gameConfig.players.player1.name;
-    document.getElementById("player1Score").textContent =
+    document.getElementById("player1ScoreFinal").textContent =
         gameConfig.players.player1.score;
-    document.getElementById("player1Correct").textContent =
+    document.getElementById("player1CorrectFinal").textContent =
         gameConfig.players.player1.correctAnswers;
-    document.getElementById("player1Total").textContent = gameConfig.rounds;
+    document.getElementById("player1TotalFinal").textContent = gameConfig.rounds;
 
     // Manejar modo multijugador
     const winnerDisplay = document.getElementById("winnerDisplay");
@@ -866,13 +866,13 @@ async function showFinalResults() {
         player2Container.style.display = "block";
 
         // Actualizar información del jugador 2
-        document.getElementById("player2Name").textContent =
+        document.getElementById("player2NameFinal").textContent =
             gameConfig.players.player2.name;
-        document.getElementById("player2Score").textContent =
+        document.getElementById("player2ScoreFinal").textContent =
             gameConfig.players.player2.score;
-        document.getElementById("player2Correct").textContent =
+        document.getElementById("player2CorrectFinal").textContent =
             gameConfig.players.player2.correctAnswers;
-        document.getElementById("player2Total").textContent = gameConfig.rounds;
+        document.getElementById("player2TotalFinal").textContent = gameConfig.rounds;
 
         // Mostrar y actualizar ganador
         const winner =
