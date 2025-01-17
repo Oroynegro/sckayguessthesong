@@ -175,6 +175,9 @@
 }
 
 body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     background: #121212;
     color: white;
     overflow: auto; /* Permite el desplazamiento */
@@ -307,6 +310,7 @@ body {
     padding: 20px;
     border-radius: 10px;
     margin: 20px;
+    min-width: 700px;
 }
 #gameContainer {
     max-width: 800px;
@@ -354,6 +358,7 @@ input {
     border-radius: 10px;
     text-align: center;
     margin: 20px;
+    min-width: 700px;
 }
 
 .game-status {
@@ -696,6 +701,12 @@ input:disabled {
 }
 
 @media (max-width: 600px) {
+    .game-container {
+        min-width: 0px;
+    }
+    .game-config {
+        min-width: 0px;
+    }
     .game-info {
         flex-direction: column;
         gap: 10px;
