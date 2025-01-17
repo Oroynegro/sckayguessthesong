@@ -314,7 +314,6 @@ body {
 }
 #gameContainer {
     max-width: 800px;
-    margin: 20px;
     overflow: auto;
     -webkit-overflow-scrolling: touch; /* Suaviza el scroll en dispositivos móviles */
 }
