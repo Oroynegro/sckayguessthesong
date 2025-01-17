@@ -105,6 +105,7 @@
     gap: 15px; /* Espacio entre los elementos */
     flex-direction: column; /* Si quieres que los elementos estén en columnas */
     font-size: 2em;
+    padding: 10px;
 }
 
 @keyframes pop-in {
@@ -176,7 +177,6 @@
 body {
     background: #121212;
     color: white;
-    padding: 20px;
     overflow: auto; /* Permite el desplazamiento */
 }
 #submitGuess {
@@ -191,6 +191,7 @@ body {
 }
 .game-header {
     text-align: center;
+    margin-top: 20px;
     margin-bottom: 30px;
 }
 
@@ -305,11 +306,11 @@ body {
     background: #282828;
     padding: 20px;
     border-radius: 10px;
-    margin-bottom: 20px;
+    margin: 20px;
 }
 #gameContainer {
     max-width: 800px;
-    margin: 0 auto;
+    margin: 20px;
     overflow: auto;
     -webkit-overflow-scrolling: touch; /* Suaviza el scroll en dispositivos móviles */
 }
@@ -352,6 +353,7 @@ input {
     padding-bottom: 50px;
     border-radius: 10px;
     text-align: center;
+    margin: 20px;
 }
 
 .game-status {
@@ -489,6 +491,7 @@ input:disabled {
     padding: 20px;
     border-radius: 10px;
     text-align: center;
+    margin: 20px;
 }
 
 .overlay {
@@ -608,7 +611,7 @@ input:disabled {
 }
 #fullscreenBtn {
     position: absolute; /* La imagen se mantiene en su posición sin importar el scroll */
-    margin: 30px 3px;
+    margin: 30px 20px;
     padding: 0;
     z-index: 1000; /* Asegura que esté encima de otros elementos si es necesario */
     background-color: #282828;
@@ -817,7 +820,7 @@ input:disabled {
         margin: 0;
     }
     .overlay-points {
-        font-size: 1.2em;
+        font-size: 1em;
     }
     .points-round {
         font-size: 2em;
